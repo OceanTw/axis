@@ -21,7 +21,6 @@ public class ToolListener implements Listener {
         ToolService.get().getToolFromItem(item).ifPresent(tool -> {
             ToolSettings settings = tool.createDefaultSettings();
             Action action = event.getAction();
-            boolean used = false;
 
             event.setCancelled(true);
 
