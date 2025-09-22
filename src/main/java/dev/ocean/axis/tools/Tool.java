@@ -21,7 +21,7 @@ public abstract class Tool {
     private final Material icon;
     private final ToolSettings defaultSettings;
 
-    protected Tool(@NonNull String name, @NonNull String displayName, @NonNull String description, @NonNull Material icon) {
+    public Tool(@NonNull String name, @NonNull String displayName, @NonNull String description, @NonNull Material icon) {
         this.name = name;
         this.displayName = displayName;
         this.description = description;
