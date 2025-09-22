@@ -1,9 +1,12 @@
 package dev.ocean.axis.utils;
 
+import dev.ocean.axis.region.SelectionService;
 import lombok.experimental.UtilityClass;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
@@ -17,27 +20,36 @@ public class PlayerUtils {
     private static final double DEFAULT_MAX_DISTANCE = 100.0;
     private static final double EPSILON = 1e-6;
 
+    private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacyAmpersand();
+    private static final MiniMessage MINI = MiniMessage.miniMessage();
+
     public void sendError(Player player, String message) {
-        player.sendMessage(
-                Component.text("ERROR ").color(NamedTextColor.RED).decorate(TextDecoration.BOLD)
-                        .append(Component.text(message).color(NamedTextColor.WHITE))
-        );
+        player.sendMessage(convertLegacy("&c&lERROR &r" + message));
     }
 
     public void sendWarning(Player player, String message) {
-        player.sendMessage(
-                Component.text("WARNING ").color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD)
-                        .append(Component.text(message).color(NamedTextColor.WHITE))
-        );
+        player.sendMessage(convertLegacy("&e&lWARNING &r" + message));
     }
 
     public void sendInfo(Player player, String message) {
-        player.sendMessage(
-                Component.text("INFO ").color(NamedTextColor.BLUE)
-                        .append(Component.text(message).color(NamedTextColor.WHITE))
-        );
+        player.sendMessage(convertLegacy("&9&lINFO &r" + message));
     }
 
+    public void sendMessage(Player player, Component message) {
+        player.sendMessage(message);
+    }
+
+    public void sendMessage(Player player, String message) {
+        player.sendMessage(convertLegacy(message));
+    }
+
+    public Component convertLegacy(String input) {
+        Component legacyComponent = LEGACY.deserialize(input);
+
+        String miniMsg = MINI.serialize(legacyComponent);
+
+        return MINI.deserialize(miniMsg);
+    }
     public boolean isLookingAtBoundingBox(Player player, BoundingBox boundingBox) {
         return isLookingAtBoundingBox(player, boundingBox, DEFAULT_MAX_DISTANCE);
     }
@@ -48,6 +60,13 @@ public class PlayerUtils {
         Vector rayDirection = eyeLocation.getDirection().normalize();
 
         return rayIntersectsBoundingBox(rayOrigin, rayDirection, boundingBox, maxDistance);
+    }
+
+    public boolean isLookingAtSelection(Player player) {
+        return isLookingAtBoundingBox(player, BoundingBox.of(
+                SelectionService.get().getSelection(player.getUniqueId()).getPos1(),
+                SelectionService.get().getSelection(player.getUniqueId()).getPos2()
+        ));
     }
 
     public boolean isLookingAtSelection(Player player, Location pos1, Location pos2) {

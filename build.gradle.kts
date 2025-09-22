@@ -11,10 +11,17 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://oss.sonatype.org/content/groups/public/")
+    maven("https://repo.panda-lang.org/releases")
+    maven("https://jitpack.io")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.6-R0.1-SNAPSHOT")
+    implementation("com.github.Devlrxxh:BlockChanger:23397d3")
+    implementation("org.reflections:reflections:0.10.2")
+    implementation("dev.rollczi:litecommands-bukkit:3.10.4")
+
+
     implementation("org.projectlombok:lombok:1.18.42")
     annotationProcessor("org.projectlombok:lombok:1.18.42")
 }

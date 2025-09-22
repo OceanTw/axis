@@ -18,17 +18,17 @@ public class SelectionTool extends Tool {
     SelectionService selection = SelectionService.get();
 
     @Override
-    public boolean onLeftClick(@NonNull Player player, @NonNull Location location, @NonNull ToolSettings settings) {
+    public boolean onLeftClick(@NonNull Player player, @NonNull Location location, ToolSettings settings) {
         selection.setPos1(player.getUniqueId(), location);
         PlayerUtils.sendInfo(player, "Position 1 set!");
-        return false;
+        return true;
     }
 
     @Override
-    public boolean onRightClick(@NonNull Player player, @NonNull Location location, @NonNull ToolSettings settings) {
+    public boolean onRightClick(@NonNull Player player, @NonNull Location location, ToolSettings settings) {
         selection.setPos2(player.getUniqueId(), location);
         PlayerUtils.sendInfo(player, "Position 2 set!");
-        return false;
+        return true;
     }
 
     @Override

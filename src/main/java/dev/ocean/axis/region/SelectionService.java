@@ -32,6 +32,18 @@ public class SelectionService {
         getSelection(playerUUID).setPos2(location);
     }
 
+    public Location getPos1(UUID playerUUID) {
+        return getSelection(playerUUID).getPos1();
+    }
+
+    public Location getPos2(UUID playerUUID) {
+        return getSelection(playerUUID).getPos2();
+    }
+
+    public void clear(UUID playerUUID) {
+        playerSelections.remove(playerUUID);
+    }
+
 
     public Selection getSelection(UUID playerUUID) {
         return playerSelections.get(playerUUID);
