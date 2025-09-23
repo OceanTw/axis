@@ -82,5 +82,4 @@ public class CubeSelection extends Selection {
                 new Location(pos1.getWorld(), maxX, maxY, maxZ)
         );
     }
-
 }
