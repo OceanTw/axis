@@ -39,7 +39,7 @@ public class SelectionService {
         if (sel instanceof CubeSelection cube) {
             cube.setPos1(location);
             if (cube.getPos1() != null && cube.getPos2() != null) {
-                SelectionRenderer.startRender(Bukkit.getPlayer(playerUUID));
+//                SelectionRenderer.startRender(Bukkit.getPlayer(playerUUID));
             }
         }
     }
@@ -49,7 +49,7 @@ public class SelectionService {
         if (sel instanceof CubeSelection cube) {
             cube.setPos2(location);
             if (cube.getPos1() != null && cube.getPos2() != null) {
-                SelectionRenderer.startRender(Bukkit.getPlayer(playerUUID));
+//                SelectionRenderer.startRender(Bukkit.getPlayer(playerUUID));
             }
         }
     }

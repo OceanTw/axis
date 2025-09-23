@@ -10,6 +10,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+import java.util.Set;
+
 public class SelectionTool extends Tool {
     public SelectionTool() {
         super("selection", "Selection Tool", "Selects a region in the world!", Material.LEAD);
@@ -47,5 +49,10 @@ public class SelectionTool extends Tool {
     @Override
     public ToolSettings createDefaultSettings() {
         return null;
+    }
+
+    @Override
+    public Set<String> getConfigurableSettings() {
+        return Set.of();
     }
 }

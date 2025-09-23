@@ -9,6 +9,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+import java.util.Set;
+
 public class SphereTool extends Tool
 {
     public SphereTool() {
@@ -35,6 +38,15 @@ public class SphereTool extends Tool
 
     @Override
     public ToolSettings createDefaultSettings() {
-        return null;
+        ToolSettings settings = new ToolSettings();
+        settings.set("radius", 5);
+        settings.set("hollow", false);
+        settings.set("material", Material.STONE);
+        return settings;
+    }
+
+    @Override
+    public Set<String> getConfigurableSettings() {
+        return Set.of("radius", "hollow", "material");
     }
 }

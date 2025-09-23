@@ -11,9 +11,6 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
-import java.util.*;
-
-
 public class ToolSettingsMenu extends AbstractMenu {
 
     private final Tool tool;
@@ -71,7 +68,13 @@ public class ToolSettingsMenu extends AbstractMenu {
             } else if (value instanceof List<?> && !((List<?>) value).isEmpty() && ((List<?>) value).get(0) instanceof Material) {
                 setButton(slot, createMaterialListSetting(key, (List<Material>) value));
             } else if (value instanceof Map<?, ?>) {
-                setButton(slot, createMapSetting(key, (Map<?, ?>) value));
+                // Check if it's a Map<Material, Double> (blocks with percentages)
+                Map<?, ?> map = (Map<?, ?>) value;
+                if (!map.isEmpty() && map.keySet().iterator().next() instanceof Material) {
+                    setButton(slot, createBlockPercentageSetting(key, (Map<Material, Double>) value));
+                } else {
+                    setButton(slot, createMapSetting(key, map));
+                }
             } else if (value instanceof String) {
                 setButton(slot, createStringSetting(key, (String) value));
             }
@@ -167,6 +170,18 @@ public class ToolSettingsMenu extends AbstractMenu {
                 .build()
                 .name("§6" + formatKey(key))
                 .lore("§7Materials: §f" + materials.size(), "", "§eClick to configure materials")
+                .build();
+    }
+
+    private Button createBlockPercentageSetting(String key, Map<Material, Double> blocks) {
+        return ButtonBuilder.builder()
+                .itemStack(new ItemStack(Material.COMPARATOR))
+                .leftClick(p -> {
+                    new BlockPercentageMenu(p, key, blocks, this).open(p);
+                })
+                .build()
+                .name("§6" + formatKey(key))
+                .lore("§7Blocks: §f" + blocks.size(), "", "§eClick to configure blocks and percentages")
                 .build();
     }
 
@@ -276,6 +291,7 @@ class MaterialSelectionMenu extends AbstractMenu {
         this.allMaterials = Arrays.stream(Material.values())
                 .filter(Material::isBlock)
                 .filter(mat -> !mat.isAir())
+                .filter(Material::isItem) // Only materials that can be items
                 .sorted(Comparator.comparing(Material::name))
                 .toList();
         setupMenu();
@@ -365,6 +381,227 @@ class MaterialSelectionMenu extends AbstractMenu {
                 .build()
                 .name("§cClear All")
                 .lore("§7Remove all selected materials", "", "§eClick to clear")
+                .build();
+    }
+
+    private Button createPreviousPageButton() {
+        return ButtonBuilder.builder()
+                .itemStack(new ItemStack(Material.ARROW))
+                .leftClick(p -> {
+                    currentPage--;
+                    refresh();
+                    setupMenu();
+                })
+                .build()
+                .name("§ePrevious Page")
+                .lore("§7Page " + currentPage + "/" + (allMaterials.size() / materialsPerPage))
+                .build();
+    }
+
+    private Button createNextPageButton() {
+        return ButtonBuilder.builder()
+                .itemStack(new ItemStack(Material.ARROW))
+                .leftClick(p -> {
+                    currentPage++;
+                    refresh();
+                    setupMenu();
+                })
+                .build()
+                .name("§eNext Page")
+                .lore("§7Page " + (currentPage + 2) + "/" + ((allMaterials.size() / materialsPerPage) + 1))
+                .build();
+    }
+}
+
+class BlockPercentageMenu extends AbstractMenu {
+
+    private final Player player;
+    private final String settingKey;
+    private final Map<Material, Double> blocks;
+    private final ToolSettingsMenu parentMenu;
+    private final List<Material> allMaterials;
+    private int currentPage = 0;
+    private final int materialsPerPage = 36;
+
+    public BlockPercentageMenu(Player player, String settingKey, Map<Material, Double> blocks, ToolSettingsMenu parentMenu) {
+        super("§8Block Percentages - " + settingKey, 54);
+        this.player = player;
+        this.settingKey = settingKey;
+        this.blocks = new HashMap<>(blocks);
+        this.parentMenu = parentMenu;
+        this.allMaterials = Arrays.stream(Material.values())
+                .filter(Material::isBlock)
+                .filter(mat -> !mat.isAir())
+                .filter(Material::isItem) // Only materials that can be items
+                .sorted(Comparator.comparing(Material::name))
+                .toList();
+        setupMenu();
+    }
+
+    private void setupMenu() {
+        fillBorder(MenuUtils.createFillerButton(Material.BLACK_STAINED_GLASS_PANE));
+
+        setButton(45, MenuUtils.createBackButton(parentMenu));
+        setButton(49, createSaveButton());
+        setButton(53, createClearAllButton());
+        setButton(47, createNormalizeButton());
+
+        if (currentPage > 0) {
+            setButton(46, createPreviousPageButton());
+        }
+
+        if ((currentPage + 1) * materialsPerPage < allMaterials.size()) {
+            setButton(52, createNextPageButton());
+        }
+
+        setupMaterialButtons();
+    }
+
+    private void setupMaterialButtons() {
+        int startIndex = currentPage * materialsPerPage;
+        int endIndex = Math.min(startIndex + materialsPerPage, allMaterials.size());
+
+        int slot = 10;
+        for (int i = startIndex; i < endIndex; i++) {
+            Material material = allMaterials.get(i);
+            double percentage = blocks.getOrDefault(material, 0.0);
+
+            if (percentage > 0 || currentPage == 0) { // Show on first page or if has percentage
+                Button button = createMaterialButton(material, percentage);
+                if (button != null) { // Only set button if it was created successfully
+                    setButton(slot, button);
+                }
+
+                slot++;
+                if (slot % 9 == 8) slot += 2;
+                if (slot >= 44) break;
+            }
+        }
+    }
+
+    private Button createMaterialButton(Material material, double percentage) {
+        ItemStack item;
+        try {
+            item = new ItemStack(material);
+        } catch (IllegalArgumentException e) {
+            // Skip materials that can't be items
+            return null;
+        }
+
+        boolean hasPercentage = percentage > 0;
+
+        return ButtonBuilder.builder()
+                .itemStack(item)
+                .leftClick(p -> {
+                    if (hasPercentage) {
+                        blocks.put(material, Math.min(percentage + 1.0, 100.0));
+                    } else {
+                        blocks.put(material, 1.0);
+                    }
+                    refresh();
+                    setupMenu();
+                })
+                .rightClick(p -> {
+                    if (hasPercentage) {
+                        double newPercentage = Math.max(percentage - 1.0, 0.0);
+                        if (newPercentage == 0.0) {
+                            blocks.remove(material);
+                        } else {
+                            blocks.put(material, newPercentage);
+                        }
+                    }
+                    refresh();
+                    setupMenu();
+                })
+                .shiftLeftClick(p -> {
+                    if (hasPercentage) {
+                        blocks.put(material, Math.min(percentage + 10.0, 100.0));
+                    } else {
+                        blocks.put(material, 10.0);
+                    }
+                    refresh();
+                    setupMenu();
+                })
+                .shiftRightClick(p -> {
+                    if (hasPercentage) {
+                        double newPercentage = Math.max(percentage - 10.0, 0.0);
+                        if (newPercentage == 0.0) {
+                            blocks.remove(material);
+                        } else {
+                            blocks.put(material, newPercentage);
+                        }
+                    }
+                    refresh();
+                    setupMenu();
+                })
+                .build()
+                .name("§6" + material.name())
+                .lore(
+                        "§7Percentage: §f" + String.format("%.1f%%", percentage),
+                        "",
+                        "§eLeft Click: +1%",
+                        "§eRight Click: -1%",
+                        "§eShift Left: +10%",
+                        "§eShift Right: -10%"
+                )
+                .amount(Math.max(1, Math.min(64, (int) percentage)))
+                .build();
+    }
+
+    private Button createSaveButton() {
+        double totalPercentage = blocks.values().stream().mapToDouble(Double::doubleValue).sum();
+
+        return ButtonBuilder.builder()
+                .itemStack(new ItemStack(Material.GREEN_CONCRETE))
+                .leftClick(p -> {
+                    parentMenu.settings.setMaterialPercentages(settingKey, blocks);
+                    parentMenu.open(player);
+                })
+                .build()
+                .name("§aSave Configuration")
+                .lore(
+                        "§7Blocks: §f" + blocks.size(),
+                        "§7Total: §f" + String.format("%.1f%%", totalPercentage),
+                        "",
+                        "§eClick to save and return"
+                )
+                .build();
+    }
+
+    private Button createClearAllButton() {
+        return ButtonBuilder.builder()
+                .itemStack(new ItemStack(Material.RED_CONCRETE))
+                .leftClick(p -> {
+                    blocks.clear();
+                    refresh();
+                    setupMenu();
+                })
+                .build()
+                .name("§cClear All")
+                .lore("§7Remove all blocks", "", "§eClick to clear")
+                .build();
+    }
+
+    private Button createNormalizeButton() {
+        return ButtonBuilder.builder()
+                .itemStack(new ItemStack(Material.REDSTONE_BLOCK))
+                .leftClick(p -> {
+                    if (!blocks.isEmpty()) {
+                        double equalPercentage = 100.0 / blocks.size();
+                        blocks.replaceAll((material, percentage) -> equalPercentage);
+                        refresh();
+                        setupMenu();
+                        player.sendMessage("§aPercentages normalized to equal distribution!");
+                    }
+                })
+                .build()
+                .name("§6Normalize Percentages")
+                .lore(
+                        "§7Distributes 100% equally",
+                        "§7among all selected blocks",
+                        "",
+                        "§eClick to normalize"
+                )
                 .build();
     }
 

@@ -1,6 +1,7 @@
 package dev.ocean.axis.utils.menu.buttons.impl;
 
 import dev.ocean.axis.utils.menu.buttons.AbstractButton;
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
@@ -8,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.function.Consumer;
 
 public class ToggleButton extends AbstractButton {
+    @Getter
     private boolean toggled;
     private ItemStack toggledItem;
     private Consumer<Player> onToggle;
@@ -26,10 +28,6 @@ public class ToggleButton extends AbstractButton {
     public void toggle() {
         toggled = !toggled;
         itemStack = toggled ? toggledItem.clone() : getItemStack();
-    }
-
-    public boolean isToggled() {
-        return toggled;
     }
 
     @Override
