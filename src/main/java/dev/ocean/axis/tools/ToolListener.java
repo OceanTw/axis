@@ -25,7 +25,7 @@ public class ToolListener implements Listener {
             event.setCancelled(true);
 
             switch (action) {
-                case LEFT_CLICK_BLOCK -> {
+                case LEFT_CLICK_BLOCK, LEFT_CLICK_AIR -> {
                     if (tool.canUse(player)) {
                         tool.onLeftClick(player, event.getClickedBlock().getLocation(), settings);
                     }

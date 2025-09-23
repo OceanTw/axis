@@ -26,22 +26,21 @@ public class FillTool extends Tool {
     SelectionService selection = SelectionService.get();
 
     @Override
-    public boolean onLeftClick(@NonNull Player player, @NonNull Location location, ToolSettings settings) {
-        // TODO: open settings menu
+    public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
+        HistoryService.get().undo(player);
+        PlayerUtils.sendInfo(player, "Undid 1 action");
         return false;
     }
 
     @Override
-    public boolean onRightClick(@NonNull Player player, @NonNull Location location, ToolSettings settings) {
-        if (!PlayerUtils.isLookingAtSelection(player)) return false;
-
+    public boolean onRightClick(@NonNull Player player, Location location, ToolSettings settings) {
         var selectionOptional = selection.getSelection(player.getUniqueId());
         if (selectionOptional == null) return false;
 
         CuboidSnapshot.create(
                 selection.getPos1(player.getUniqueId()),
                 selection.getPos2(player.getUniqueId())
-        ).thenAccept(snapshot -> HistoryService.get().add(snapshot));
+        ).thenAccept(snapshot -> HistoryService.get().add(player, snapshot));
 
         selectionOptional.getBlocksAsync().thenAccept(locations -> {
             Map<Location, BlockData> blocks = new HashMap<>();

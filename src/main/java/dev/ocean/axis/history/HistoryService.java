@@ -1,9 +1,9 @@
 package dev.ocean.axis.history;
 
 import dev.lrxh.blockChanger.snapshot.CuboidSnapshot;
+import org.bukkit.entity.Player;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.*;
 
 public class HistoryService {
     private static HistoryService instance;
@@ -15,14 +15,22 @@ public class HistoryService {
         return instance;
     }
 
+    private final Map<UUID, Deque<CuboidSnapshot>> histories = new HashMap<>();
 
-    private Deque<CuboidSnapshot> history = new ArrayDeque<>();
-
-    public void add(CuboidSnapshot action) {
-        history.push(action);
+    private Deque<CuboidSnapshot> getHistory(UUID playerId) {
+        return histories.computeIfAbsent(playerId, id -> new ArrayDeque<>());
     }
 
-    public CuboidSnapshot undo() {
+    public void add(Player player, CuboidSnapshot action) {
+        getHistory(player.getUniqueId()).push(action);
+    }
+
+    public CuboidSnapshot undo(Player player) {
+        Deque<CuboidSnapshot> history = getHistory(player.getUniqueId());
         return history.isEmpty() ? null : history.pop();
+    }
+
+    public void clear(Player player) {
+        histories.remove(player.getUniqueId());
     }
 }

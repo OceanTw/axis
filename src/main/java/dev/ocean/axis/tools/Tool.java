@@ -35,8 +35,8 @@ public abstract class Tool {
         this.defaultSettings = createDefaultSettings();
     }
 
-    public abstract boolean onLeftClick(@NonNull Player player, @NonNull Location location, ToolSettings settings);
-    public abstract boolean onRightClick(@NonNull Player player, @NonNull Location location, ToolSettings settings);
+    public abstract boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings);
+    public abstract boolean onRightClick(@NonNull Player player, Location location, ToolSettings settings);
     public abstract boolean canUse(@NonNull Player player);
     public abstract ToolSettings createDefaultSettings();
 
