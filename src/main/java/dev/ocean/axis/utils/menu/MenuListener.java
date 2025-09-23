@@ -1,5 +1,6 @@
 package dev.ocean.axis.utils.menu;
 
+import dev.ocean.axis.AxisPlugin;
 import dev.ocean.axis.utils.menu.buttons.Button;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,8 +12,8 @@ import org.bukkit.plugin.Plugin;
 public class MenuListener implements Listener {
     private final Plugin plugin;
 
-    public MenuListener(Plugin plugin) {
-        this.plugin = plugin;
+    public MenuListener() {
+        this.plugin = AxisPlugin.getInstance();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 

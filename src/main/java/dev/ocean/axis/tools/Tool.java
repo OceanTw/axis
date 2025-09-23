@@ -17,6 +17,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 public abstract class Tool {
@@ -39,6 +40,7 @@ public abstract class Tool {
     public abstract boolean onRightClick(@NonNull Player player, Location location, ToolSettings settings);
     public abstract boolean canUse(@NonNull Player player);
     public abstract ToolSettings createDefaultSettings();
+    public abstract Set<String> getConfigurableSettings();
 
     public ItemStack createItemStack() {
         ItemStack item = new ItemStack(icon);
@@ -48,9 +50,10 @@ public abstract class Tool {
             meta.displayName(Component.text(displayName).color(NamedTextColor.AQUA));
             meta.lore(createItemLore());
 
-            // Mark this item as belonging to this Tool
             PersistentDataContainer data = meta.getPersistentDataContainer();
-            data.set(getKey(), PersistentDataType.STRING, name);
+            data.set(getToolIdKey(), PersistentDataType.STRING, name);
+
+            saveSettingsToItem(meta, defaultSettings);
 
             item.setItemMeta(meta);
         }
@@ -58,16 +61,113 @@ public abstract class Tool {
         return item;
     }
 
+    public ItemStack getItem() {
+        return createItemStack();
+    }
+
     public boolean matches(ItemStack item) {
         if (item == null || !item.hasItemMeta()) return false;
         ItemMeta meta = item.getItemMeta();
-        String stored = meta.getPersistentDataContainer().get(getKey(), PersistentDataType.STRING);
+        String stored = meta.getPersistentDataContainer().get(getToolIdKey(), PersistentDataType.STRING);
         return stored != null && stored.equals(name);
     }
 
-    private NamespacedKey getKey() {
+    public ToolSettings getItemSettings(ItemStack item) {
+        if (!matches(item)) return createDefaultSettings();
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return createDefaultSettings();
+
+        return loadSettingsFromItem(meta);
+    }
+
+    public void saveItemSettings(ItemStack item, ToolSettings settings) {
+        if (!matches(item)) return;
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
+
+        saveSettingsToItem(meta, settings);
+        item.setItemMeta(meta);
+    }
+
+    private void saveSettingsToItem(ItemMeta meta, ToolSettings settings) {
+        PersistentDataContainer data = meta.getPersistentDataContainer();
+
+        for (String key : getConfigurableSettings()) {
+            Object value = settings.get(key, null);
+            if (value == null) continue;
+
+            NamespacedKey settingKey = new NamespacedKey(AxisPlugin.getInstance(), "setting_" + key);
+
+            if (value instanceof Boolean) {
+                data.set(settingKey, PersistentDataType.BYTE, (byte) (((Boolean) value) ? 1 : 0));
+            } else if (value instanceof Integer) {
+                data.set(settingKey, PersistentDataType.INTEGER, (Integer) value);
+            } else if (value instanceof Double) {
+                data.set(settingKey, PersistentDataType.DOUBLE, (Double) value);
+            } else if (value instanceof String) {
+                data.set(settingKey, PersistentDataType.STRING, (String) value);
+            } else if (value instanceof List<?>) {
+                List<?> list = (List<?>) value;
+                if (!list.isEmpty() && list.get(0) instanceof Material) {
+                    List<Material> materials = (List<Material>) list;
+                    String serialized = materials.stream()
+                            .map(Material::name)
+                            .reduce((a, b) -> a + "," + b)
+                            .orElse("");
+                    data.set(settingKey, PersistentDataType.STRING, serialized);
+                }
+            }
+        }
+    }
+
+    private ToolSettings loadSettingsFromItem(ItemMeta meta) {
+        ToolSettings settings = createDefaultSettings();
+        PersistentDataContainer data = meta.getPersistentDataContainer();
+
+        for (String key : getConfigurableSettings()) {
+            NamespacedKey settingKey = new NamespacedKey(AxisPlugin.getInstance(), "setting_" + key);
+            Object defaultValue = settings.get(key, null);
+
+            if (defaultValue instanceof Boolean) {
+                Byte stored = data.get(settingKey, PersistentDataType.BYTE);
+                if (stored != null) {
+                    settings.set(key, stored == 1);
+                }
+            } else if (defaultValue instanceof Integer) {
+                Integer stored = data.get(settingKey, PersistentDataType.INTEGER);
+                if (stored != null) {
+                    settings.set(key, stored);
+                }
+            } else if (defaultValue instanceof Double) {
+                Double stored = data.get(settingKey, PersistentDataType.DOUBLE);
+                if (stored != null) {
+                    settings.set(key, stored);
+                }
+            } else if (defaultValue instanceof String) {
+                String stored = data.get(settingKey, PersistentDataType.STRING);
+                if (stored != null) {
+                    settings.set(key, stored);
+                }
+            } else if (defaultValue instanceof List<?>) {
+                String stored = data.get(settingKey, PersistentDataType.STRING);
+                if (stored != null && !stored.isEmpty()) {
+                    List<Material> materials = List.of(stored.split(",")).stream()
+                            .map(Material::valueOf)
+                            .toList();
+                    settings.set(key, materials);
+                }
+            }
+        }
+
+        return settings;
+    }
+
+    private NamespacedKey getToolIdKey() {
         return new NamespacedKey(AxisPlugin.getInstance(), "tool-id");
     }
+
     protected List<Component> createItemLore() {
         return List.of(
                 Component.text(description).color(NamedTextColor.GRAY),
@@ -76,7 +176,9 @@ public abstract class Tool {
                         .append(Component.text(getLeftClickDescription()).color(NamedTextColor.WHITE)),
                 Component.empty(),
                 Component.text("RIGHT CLICK: ").color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD)
-                        .append(Component.text(getRightClickDescription()).color(NamedTextColor.WHITE))
+                        .append(Component.text(getRightClickDescription()).color(NamedTextColor.WHITE)),
+                Component.empty(),
+                Component.text("F + LEFT CLICK: Configure Settings").color(NamedTextColor.GOLD)
         );
     }
 

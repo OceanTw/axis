@@ -6,6 +6,7 @@ import dev.ocean.axis.commands.TestCommand;
 import dev.ocean.axis.commands.ToolCommand;
 import dev.ocean.axis.tools.ToolListener;
 import dev.ocean.axis.tools.ToolService;
+import dev.ocean.axis.utils.menu.MenuListener;
 import dev.rollczi.litecommands.LiteCommands;
 import dev.rollczi.litecommands.bukkit.LiteBukkitFactory;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
@@ -37,6 +38,7 @@ public class AxisPlugin extends JavaPlugin {
 
         EntityLib.init(platform, settings);
         getServer().getPluginManager().registerEvents(new ToolListener(), this);
+        getServer().getPluginManager().registerEvents(new MenuListener(), this);
 
         this.liteCommands = LiteBukkitFactory.builder("fallback-prefix", this)
                 .commands(
