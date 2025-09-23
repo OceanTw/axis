@@ -8,11 +8,14 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.title.Title;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
+import java.time.Duration;
 import java.util.Optional;
 
 @UtilityClass
@@ -20,6 +23,10 @@ public class PlayerUtils {
 
     private static final double DEFAULT_MAX_DISTANCE = 100.0;
     private static final double EPSILON = 1e-6;
+
+    private static final Duration DEFAULT_FADE_IN = Duration.ofMillis(500);
+    private static final Duration DEFAULT_STAY = Duration.ofMillis(3500);
+    private static final Duration DEFAULT_FADE_OUT = Duration.ofMillis(1000);
 
     private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacyAmpersand();
     private static final MiniMessage MINI = MiniMessage.miniMessage();
@@ -53,6 +60,181 @@ public class PlayerUtils {
     }
     public boolean isLookingAtBoundingBox(Player player, BoundingBox boundingBox) {
         return isLookingAtBoundingBox(player, boundingBox, DEFAULT_MAX_DISTANCE);
+    }
+
+    public void playSound(Player player, String sound) {
+        player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
+    }
+
+    public void playSound(Player player, String sound, float volume, float pitch) {
+        player.playSound(player.getLocation(), sound, volume, pitch);
+    }
+
+    public void playSound(Player player, Location location, String sound, float volume, float pitch) {
+        player.playSound(location, sound, volume, pitch);
+    }
+
+    public void playSoundSuccess(Player player) {
+        playSound(player, "entity.experience_orb.pickup", 1.0f, 1.2f);
+    }
+
+    public void playSoundError(Player player) {
+        playSound(player, "entity.villager.no", 1.0f, 0.8f);
+    }
+
+    public void playSoundWarning(Player player) {
+        playSound(player, "block.note_block.pling", 1.0f, 0.5f);
+    }
+
+    public void playSoundInfo(Player player) {
+        playSound(player, "entity.experience_orb.pickup", 0.7f, 1.0f);
+    }
+
+    public void playSoundClick(Player player) {
+        playSound(player, "ui.button.click", 0.5f, 1.0f);
+    }
+
+    public void playSoundTeleport(Player player) {
+        playSound(player, "entity.enderman.teleport", 1.0f, 1.0f);
+    }
+
+    public void playSoundLevelUp(Player player) {
+        playSound(player, "entity.player.levelup", 1.0f, 1.0f);
+    }
+
+    public void playSoundBell(Player player) {
+        playSound(player, "block.bell.use", 1.0f, 1.0f);
+    }
+
+    public void playSoundPop(Player player) {
+        playSound(player, "entity.chicken.egg", 1.0f, 1.5f);
+    }
+
+    public void playSoundBreak(Player player) {
+        playSound(player, "entity.item.break", 1.0f, 1.0f);
+    }
+
+    public void stopAllSounds(Player player) {
+        player.stopAllSounds();
+    }
+
+    public void stopSound(Player player, String sound) {
+        player.stopSound(sound);
+    }
+
+    public void playGlobalSound(String sound, float volume, float pitch) {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            playSound(p, sound, volume, pitch);
+        }
+    }
+
+    public void playSoundToNearbyPlayers(Location location, String sound, float volume, float pitch, double radius) {
+        for (Player player : location.getWorld().getPlayers()) {
+            if (player.getLocation().distance(location) <= radius) {
+                playSound(player, location, sound, volume, pitch);
+            }
+        }
+    }
+
+    public void sendActionBar(Player player, String message) {
+        player.sendActionBar(convertLegacy(message));
+    }
+
+    public void sendActionBar(Player player, Component message) {
+        player.sendActionBar(message);
+    }
+
+    public void sendActionBarError(Player player, String message) {
+        sendActionBar(player, "&c" + message);
+    }
+
+    public void sendActionBarWarning(Player player, String message) {
+        sendActionBar(player, "&e" + message);
+    }
+
+    public void sendActionBarInfo(Player player, String message) {
+        sendActionBar(player, "&9" + message);
+    }
+
+    public void sendActionBarSuccess(Player player, String message) {
+        sendActionBar(player, "&a" + message);
+    }
+
+    public void sendTitle(Player player, String title, String subtitle) {
+        sendTitle(player, title, subtitle, DEFAULT_FADE_IN, DEFAULT_STAY, DEFAULT_FADE_OUT);
+    }
+
+    public void sendTitle(Player player, String title, String subtitle, Duration fadeIn, Duration stay, Duration fadeOut) {
+        Component titleComponent = title != null ? convertLegacy(title) : Component.empty();
+        Component subtitleComponent = subtitle != null ? convertLegacy(subtitle) : Component.empty();
+
+        Title titleObj = Title.title(titleComponent, subtitleComponent, Title.Times.times(fadeIn, stay, fadeOut));
+        player.showTitle(titleObj);
+    }
+
+    public void sendTitle(Player player, Component title, Component subtitle) {
+        sendTitle(player, title, subtitle, DEFAULT_FADE_IN, DEFAULT_STAY, DEFAULT_FADE_OUT);
+    }
+
+    public void sendTitle(Player player, Component title, Component subtitle, Duration fadeIn, Duration stay, Duration fadeOut) {
+        Component titleComponent = title != null ? title : Component.empty();
+        Component subtitleComponent = subtitle != null ? subtitle : Component.empty();
+
+        Title titleObj = Title.title(titleComponent, subtitleComponent, Title.Times.times(fadeIn, stay, fadeOut));
+        player.showTitle(titleObj);
+    }
+
+    public void sendTitleOnly(Player player, String title) {
+        sendTitle(player, title, null);
+    }
+
+    public void sendTitleOnly(Player player, Component title) {
+        sendTitle(player, title, null);
+    }
+
+    public void sendSubtitleOnly(Player player, String subtitle) {
+        sendTitle(player, null, subtitle);
+    }
+
+    public void sendSubtitleOnly(Player player, Component subtitle) {
+        sendTitle(player, null, subtitle);
+    }
+
+    public void clearTitle(Player player) {
+        player.clearTitle();
+    }
+
+    public void resetTitleTimes(Player player) {
+        player.resetTitle();
+    }
+
+    public void sendQuickTitle(Player player, String title, String subtitle) {
+        sendTitle(player, title, subtitle,
+                Duration.ofMillis(250),
+                Duration.ofMillis(1000),
+                Duration.ofMillis(250));
+    }
+
+    public void sendLongTitle(Player player, String title, String subtitle) {
+        sendTitle(player, title, subtitle,
+                Duration.ofMillis(1000),
+                Duration.ofMillis(5000),
+                Duration.ofMillis(1000));
+    }
+
+    public void sendTitleAndActionBar(Player player, String title, String subtitle, String actionBar) {
+        sendTitle(player, title, subtitle);
+        sendActionBar(player, actionBar);
+    }
+
+    public void sendSuccess(Player player, String message) {
+        sendTitleOnly(player, "&a&l✓ " + message);
+        sendActionBarSuccess(player, message);
+    }
+
+    public void sendErrorTitle(Player player, String message) {
+        sendTitleOnly(player, "&c&l✗ Error");
+        sendActionBarError(player, message);
     }
 
     public boolean isLookingAtBoundingBox(Player player, BoundingBox boundingBox, double maxDistance) {
