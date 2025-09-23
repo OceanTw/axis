@@ -1,6 +1,8 @@
 package dev.ocean.axis.region;
 
 import dev.ocean.axis.region.impl.CubeSelection;
+import dev.ocean.axis.visuals.SelectionRenderer;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import java.util.UUID;
@@ -36,6 +38,9 @@ public class SelectionService {
         Selection sel = playerSelections.computeIfAbsent(playerUUID, id -> new CubeSelection());
         if (sel instanceof CubeSelection cube) {
             cube.setPos1(location);
+            if (cube.getPos1() != null && cube.getPos2() != null) {
+                SelectionRenderer.startRender(Bukkit.getPlayer(playerUUID));
+            }
         }
     }
 
@@ -43,6 +48,9 @@ public class SelectionService {
         Selection sel = playerSelections.computeIfAbsent(playerUUID, id -> new CubeSelection());
         if (sel instanceof CubeSelection cube) {
             cube.setPos2(location);
+            if (cube.getPos1() != null && cube.getPos2() != null) {
+                SelectionRenderer.startRender(Bukkit.getPlayer(playerUUID));
+            }
         }
     }
 

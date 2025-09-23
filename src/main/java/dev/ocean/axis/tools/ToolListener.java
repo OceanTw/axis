@@ -8,6 +8,8 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.entity.Player;
 
+import java.util.Objects;
+
 public class ToolListener implements Listener {
 
     @EventHandler
@@ -27,6 +29,10 @@ public class ToolListener implements Listener {
             switch (action) {
                 case LEFT_CLICK_BLOCK, LEFT_CLICK_AIR -> {
                     if (tool.canUse(player)) {
+                        if (event.getClickedBlock() == null) {
+                            tool.onLeftClick(player, null, settings);
+                            break;
+                        }
                         tool.onLeftClick(player, event.getClickedBlock().getLocation(), settings);
                     }
                 }

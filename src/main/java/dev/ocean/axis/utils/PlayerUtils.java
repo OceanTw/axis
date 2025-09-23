@@ -1,6 +1,7 @@
 package dev.ocean.axis.utils;
 
 import dev.ocean.axis.region.SelectionService;
+import dev.ocean.axis.region.impl.CubeSelection;
 import lombok.experimental.UtilityClass;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -64,8 +65,8 @@ public class PlayerUtils {
 
     public boolean isLookingAtSelection(Player player) {
         return isLookingAtBoundingBox(player, BoundingBox.of(
-                SelectionService.get().getSelection(player.getUniqueId()).getPos1(),
-                SelectionService.get().getSelection(player.getUniqueId()).getPos2()
+                ((CubeSelection) SelectionService.get().getSelection(player.getUniqueId())).getPos1(),
+                ((CubeSelection) SelectionService.get().getSelection(player.getUniqueId())).getPos2()
         ));
     }
 

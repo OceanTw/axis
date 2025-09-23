@@ -31,6 +31,9 @@ public class SelectionTool extends Tool {
 
     @Override
     public boolean onRightClick(@NonNull Player player, Location location, ToolSettings settings) {
+        if (location == null) {
+            return true;
+        }
         selection.setPos2(player.getUniqueId(), location);
         PlayerUtils.sendInfo(player, "Position 2 set!");
         return true;

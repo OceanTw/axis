@@ -2,6 +2,7 @@ package dev.ocean.axis;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import dev.lrxh.blockChanger.BlockChanger;
+import dev.ocean.axis.commands.TestCommand;
 import dev.ocean.axis.commands.ToolCommand;
 import dev.ocean.axis.tools.ToolListener;
 import dev.ocean.axis.tools.ToolService;
@@ -39,7 +40,8 @@ public class AxisPlugin extends JavaPlugin {
 
         this.liteCommands = LiteBukkitFactory.builder("fallback-prefix", this)
                 .commands(
-                        new ToolCommand()
+                        new ToolCommand(),
+                        new TestCommand()
                 )
                 .build();
     }
