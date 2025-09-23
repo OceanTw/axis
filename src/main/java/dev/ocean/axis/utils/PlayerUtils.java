@@ -222,21 +222,6 @@ public class PlayerUtils {
                 Duration.ofMillis(1000));
     }
 
-    public void sendTitleAndActionBar(Player player, String title, String subtitle, String actionBar) {
-        sendTitle(player, title, subtitle);
-        sendActionBar(player, actionBar);
-    }
-
-    public void sendSuccess(Player player, String message) {
-        sendTitleOnly(player, "&a&l✓ " + message);
-        sendActionBarSuccess(player, message);
-    }
-
-    public void sendErrorTitle(Player player, String message) {
-        sendTitleOnly(player, "&c&l✗ Error");
-        sendActionBarError(player, message);
-    }
-
     public boolean isLookingAtBoundingBox(Player player, BoundingBox boundingBox, double maxDistance) {
         Location eyeLocation = player.getEyeLocation();
         Vector rayOrigin = eyeLocation.toVector();

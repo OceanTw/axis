@@ -1,7 +1,9 @@
 package dev.ocean.axis.tools.impl;
 
+import dev.ocean.axis.history.HistoryService;
 import dev.ocean.axis.tools.Tool;
 import dev.ocean.axis.tools.ToolSettings;
+import dev.ocean.axis.utils.PlayerUtils;
 import lombok.NonNull;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,18 +17,15 @@ public class SphereTool extends Tool
 
     @Override
     public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
-        if (player.isSneaking() && settings.get("radius", 3) > 1) {
-            settings.set("radius", settings.get("radius", 3) - 1);
-        } else {
-            settings.set("radius", settings.get("radius", 3) + 1);
-        }
-
+        HistoryService.get().undo(player);
+        PlayerUtils.sendInfo(player, "Undid 1 action");
         return true;
     }
 
     @Override
     public boolean onRightClick(@NonNull Player player, Location location, ToolSettings settings) {
-        return false;
+
+        return true;
     }
 
     @Override
