@@ -11,7 +11,6 @@ import lombok.NonNull;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 
@@ -23,19 +22,19 @@ public class FillTool extends Tool {
         super("fill", "Fill Tool", "Fills your selection with blocks based on your settings!", Material.POWDER_SNOW_BUCKET);
     }
 
-    SelectionService selection = SelectionService.get();
+    private final SelectionService selection = SelectionService.get();
 
     @Override
     public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
         if (HistoryService.get().getHistory(player).isEmpty()) {
             PlayerUtils.sendInfo(player, "No actions to undo!");
-            PlayerUtils.playSoundInfo(player);
+            PlayerUtils.playSoundError(player);
             return true;
         }
+
         HistoryService.get().undo(player).restore(true);
         PlayerUtils.sendInfo(player, "Undid 1 action");
         PlayerUtils.playSoundInfo(player);
-
         return true;
     }
 
@@ -57,42 +56,39 @@ public class FillTool extends Tool {
 
         boolean replaceAirOnly = settings.get("replace_air_only", false);
 
-        CuboidSnapshot.create(
-                selection.getPos1(player.getUniqueId()),
-                selection.getPos2(player.getUniqueId())
-        ).thenAccept(snapshot -> HistoryService.get().add(player, snapshot));
+        Location pos1 = selection.getPos1(player.getUniqueId());
+        Location pos2 = selection.getPos2(player.getUniqueId());
+
+        // Save snapshot for undo
+        CuboidSnapshot.create(pos1, pos2).thenAccept(snapshot -> HistoryService.get().add(player, snapshot));
 
         selectionOptional.getBlocksAsync().thenAccept(locations -> {
-            Map<Location, BlockData> blocks = new HashMap<>();
-            int totalBlocks = locations.size();
-            int processedBlocks = 0;
+            Map<Location, BlockData> blocksToSet = new HashMap<>();
 
             for (Location loc : locations) {
-                Block block = loc.getBlock();
-
-                if (replaceAirOnly && !block.getType().isAir()) {
+                if (replaceAirOnly && !loc.getBlock().getType().isAir()) {
                     continue;
                 }
 
-                Material materialToUse = selectMaterialByPercentage(blockSettings);
-                blocks.put(loc, materialToUse.createBlockData());
-                processedBlocks++;
+                Material selected = selectMaterialByPercentage(blockSettings);
+                if (selected != null) {
+                    blocksToSet.put(loc, selected.createBlockData());
+                }
             }
 
-            if (blocks.isEmpty()) {
-                PlayerUtils.sendWarning(player, "No blocks were changed. Check your settings!");
+            if (blocksToSet.isEmpty()) {
+                PlayerUtils.sendWarning(player, "No blocks were changed. Check your settings.");
                 PlayerUtils.playSoundWarning(player);
                 return;
             }
 
             long startTime = System.currentTimeMillis();
-            PlayerUtils.sendInfo(player, "Filling " + blocks.size() + " blocks...");
+            PlayerUtils.sendInfo(player, "Filling " + blocksToSet.size() + " blocks...");
 
-            BlockChanger.setBlocks(blocks, true).thenAccept(success -> {
-                long endTime = System.currentTimeMillis();
-                long duration = endTime - startTime;
+            BlockChanger.setBlocks(blocksToSet, true).thenAccept(success -> {
+                long duration = System.currentTimeMillis() - startTime;
                 PlayerUtils.sendMessage(player,
-                        Component.text("§a§lSUCCESS! §rFilled §d" + blocks.size() + "§r blocks in §e" + duration + "ms"));
+                        Component.text("§a§lSUCCESS! §rFilled §d" + blocksToSet.size() + "§r blocks in §e" + duration + "ms"));
                 PlayerUtils.playSoundSuccess(player);
             });
         });
@@ -101,10 +97,8 @@ public class FillTool extends Tool {
     }
 
     private Material selectMaterialByPercentage(Map<Material, Double> materialPercentages) {
-        // Calculate total percentage
-        double totalPercentage = materialPercentages.values().stream()
-                .mapToDouble(Double::doubleValue)
-                .sum();
+        double total = materialPercentages.values().stream().mapToDouble(Double::doubleValue).sum();
+        if (total <= 0) return null;
 
         double random = ThreadLocalRandom.current().nextDouble() * 100.0;
         double cumulative = 0.0;
@@ -116,13 +110,10 @@ public class FillTool extends Tool {
             }
         }
 
-        // for cases where the total percentage is less than 100%
-        if (totalPercentage < 100.0 && random > totalPercentage) {
-            return null;
-        }
-
+        // Fallback: return any one of the materials
         return materialPercentages.keySet().iterator().next();
     }
+
     @Override
     public boolean canUse(@NonNull Player player) {
         return player.hasPermission("axis.tools.fill") || player.isOp();
@@ -131,12 +122,10 @@ public class FillTool extends Tool {
     @Override
     public ToolSettings createDefaultSettings() {
         ToolSettings settings = new ToolSettings();
-        settings.set("replace_air_only", false);
-
         Map<Material, Double> defaultBlocks = new HashMap<>();
         defaultBlocks.put(Material.STONE, 100.0);
         settings.setMaterialPercentages("blocks", defaultBlocks);
-
+        settings.set("replace_air_only", false);
         return settings;
     }
 

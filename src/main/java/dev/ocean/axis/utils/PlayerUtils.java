@@ -20,7 +20,6 @@ import java.util.Optional;
 
 @UtilityClass
 public class PlayerUtils {
-
     private static final double DEFAULT_MAX_DISTANCE = 100.0;
     private static final double EPSILON = 1e-6;
 
@@ -28,19 +27,16 @@ public class PlayerUtils {
     private static final Duration DEFAULT_STAY = Duration.ofMillis(3500);
     private static final Duration DEFAULT_FADE_OUT = Duration.ofMillis(1000);
 
-    private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacyAmpersand();
-    private static final MiniMessage MINI = MiniMessage.miniMessage();
-
     public void sendError(Player player, String message) {
-        player.sendMessage(convertLegacy("&c&lERROR &r" + message));
+        player.sendMessage(ComponentUtils.convertLegacy("&c&lERROR &r" + message));
     }
 
     public void sendWarning(Player player, String message) {
-        player.sendMessage(convertLegacy("&e&lWARNING &r" + message));
+        player.sendMessage(ComponentUtils.convertLegacy("&e&lWARNING &r" + message));
     }
 
     public void sendInfo(Player player, String message) {
-        player.sendMessage(convertLegacy("&9&lINFO &r" + message));
+        player.sendMessage(ComponentUtils.convertLegacy("&9&lINFO &r" + message));
     }
 
     public void sendMessage(Player player, Component message) {
@@ -48,16 +44,14 @@ public class PlayerUtils {
     }
 
     public void sendMessage(Player player, String message) {
-        player.sendMessage(convertLegacy(message));
+        player.sendMessage(ComponentUtils.convertLegacy(message));
     }
 
+    @Deprecated
     public Component convertLegacy(String input) {
-        Component legacyComponent = LEGACY.deserialize(input);
-
-        String miniMsg = MINI.serialize(legacyComponent);
-
-        return MINI.deserialize(miniMsg);
+        return ComponentUtils.convertLegacy(input);
     }
+
     public boolean isLookingAtBoundingBox(Player player, BoundingBox boundingBox) {
         return isLookingAtBoundingBox(player, boundingBox, DEFAULT_MAX_DISTANCE);
     }
@@ -137,7 +131,7 @@ public class PlayerUtils {
     }
 
     public void sendActionBar(Player player, String message) {
-        player.sendActionBar(convertLegacy(message));
+        player.sendActionBar(ComponentUtils.convertLegacy(message));
     }
 
     public void sendActionBar(Player player, Component message) {
@@ -165,8 +159,8 @@ public class PlayerUtils {
     }
 
     public void sendTitle(Player player, String title, String subtitle, Duration fadeIn, Duration stay, Duration fadeOut) {
-        Component titleComponent = title != null ? convertLegacy(title) : Component.empty();
-        Component subtitleComponent = subtitle != null ? convertLegacy(subtitle) : Component.empty();
+        Component titleComponent = title != null ? ComponentUtils.convertLegacy(title) : Component.empty();
+        Component subtitleComponent = subtitle != null ? ComponentUtils.convertLegacy(subtitle) : Component.empty();
 
         Title titleObj = Title.title(titleComponent, subtitleComponent, Title.Times.times(fadeIn, stay, fadeOut));
         player.showTitle(titleObj);
@@ -177,8 +171,8 @@ public class PlayerUtils {
     }
 
     public void sendTitle(Player player, Component title, Component subtitle, Duration fadeIn, Duration stay, Duration fadeOut) {
-        Component titleComponent = title != null ? title : Component.empty();
-        Component subtitleComponent = subtitle != null ? subtitle : Component.empty();
+        Component titleComponent = title != null ? title.decoration(TextDecoration.ITALIC, false) : Component.empty();
+        Component subtitleComponent = subtitle != null ? subtitle.decoration(TextDecoration.ITALIC, false) : Component.empty();
 
         Title titleObj = Title.title(titleComponent, subtitleComponent, Title.Times.times(fadeIn, stay, fadeOut));
         player.showTitle(titleObj);

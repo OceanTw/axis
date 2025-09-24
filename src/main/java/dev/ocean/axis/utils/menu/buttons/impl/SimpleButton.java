@@ -1,37 +1,41 @@
 package dev.ocean.axis.utils.menu.buttons.impl;
 
 import dev.ocean.axis.utils.menu.buttons.AbstractButton;
+import lombok.Builder;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 
 public class SimpleButton extends AbstractButton {
+
+    @Builder
+    public SimpleButton(ItemStack itemStack,
+                        boolean clickable,
+                        Consumer<Player> leftClick,
+                        Consumer<Player> rightClick,
+                        Consumer<Player> shiftLeftClick,
+                        Consumer<Player> shiftRightClick,
+                        Consumer<Player> middleClick,
+                        Consumer<Player> doubleClick,
+                        Consumer<Player> dropClick,
+                        Map<ClickType, Consumer<Player>> customActions,
+                        Component name,
+                        List<Component> lore,
+                        int amount) {
+        super(itemStack, clickable, leftClick, rightClick, shiftLeftClick, shiftRightClick, middleClick, doubleClick, dropClick, customActions, name, lore, amount);
+    }
+
     public SimpleButton(ItemStack itemStack) {
-        super(itemStack);
+        super(itemStack, true, null, null, null, null, null, null, null, null, null, null, 1);
     }
 
     public SimpleButton(Material material) {
-        super(new ItemStack(material));
-    }
-
-    public SimpleButton(Material material, String displayName) {
-        super(new ItemStack(material));
-        ItemMeta meta = itemStack.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(displayName);
-            itemStack.setItemMeta(meta);
-        }
-    }
-
-    public SimpleButton(Material material, String displayName, List<String> lore) {
-        super(new ItemStack(material));
-        ItemMeta meta = itemStack.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(displayName);
-            meta.setLore(lore);
-            itemStack.setItemMeta(meta);
-        }
+        this(new ItemStack(material));
     }
 }

@@ -1,8 +1,12 @@
 package dev.ocean.axis.utils.menu;
 
-import dev.ocean.axis.utils.menu.builders.ButtonBuilder;
+import dev.ocean.axis.utils.ComponentUtils;
 import dev.ocean.axis.utils.menu.buttons.Button;
+import dev.ocean.axis.utils.menu.buttons.impl.SimpleButton;
+import dev.ocean.axis.utils.menu.buttons.impl.ToggleButton;
 import dev.ocean.axis.utils.menu.impl.PaginatedMenu;
+import lombok.experimental.UtilityClass;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -10,62 +14,70 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
+@UtilityClass
 public class MenuUtils {
-    public static Button createFillerButton(Material material) {
-        return ButtonBuilder.builder()
+
+    public Button createFillerButton(Material material) {
+        return SimpleButton.builder()
                 .itemStack(new ItemStack(material))
                 .clickable(false)
-                .build()
-                .name(" ")
+                .name(ComponentUtils.plain(" "))
                 .build();
     }
 
-    public static Button createCloseButton() {
-        return ButtonBuilder.builder()
+    public Button createCloseButton() {
+        return SimpleButton.builder()
                 .itemStack(new ItemStack(Material.BARRIER))
                 .leftClick(Player::closeInventory)
-                .build()
-                .name("§cClose")
+                .name(ComponentUtils.colored("Close", NamedTextColor.RED))
                 .build();
     }
 
-    public static Button createBackButton(Menu previousMenu) {
-        return ButtonBuilder.builder()
+    public Button createBackButton(Menu previousMenu) {
+        return SimpleButton.builder()
                 .itemStack(new ItemStack(Material.ARROW))
                 .leftClick(player -> {
                     player.closeInventory();
                     previousMenu.open(player);
                 })
-                .build()
-                .name("§7← Back")
+                .name(ComponentUtils.colored("← Back", NamedTextColor.GRAY))
                 .build();
     }
 
-    public static Button createNextPageButton(PaginatedMenu menu) {
-        return ButtonBuilder.builder()
+    public Button createNextPageButton(PaginatedMenu menu) {
+        return SimpleButton.builder()
                 .itemStack(new ItemStack(Material.ARROW))
                 .leftClick(player -> {
                     menu.nextPage();
                     menu.refresh();
                 })
-                .build()
-                .name("§aNext Page")
+                .name(ComponentUtils.colored("Next Page", NamedTextColor.GREEN))
                 .build();
     }
 
-    public static Button createPreviousPageButton(PaginatedMenu menu) {
-        return ButtonBuilder.builder()
+    public Button createPreviousPageButton(PaginatedMenu menu) {
+        return SimpleButton.builder()
                 .itemStack(new ItemStack(Material.ARROW))
                 .leftClick(player -> {
                     menu.previousPage();
                     menu.refresh();
                 })
-                .build()
-                .name("§aPrevious Page")
+                .name(ComponentUtils.colored("Previous Page", NamedTextColor.GREEN))
                 .build();
     }
 
-    public static int[] getSlots(int startRow, int endRow, int startCol, int endCol) {
+    public ToggleButton createToggleButton(ItemStack defaultItem, ItemStack toggledItem, boolean toggled, String nameDefault, String nameToggled, Runnable toggleAction) {
+        return ToggleButton.builder()
+                .itemStack(defaultItem)
+                .toggledItem(toggledItem)
+                .toggled(toggled)
+                .clickable(true)
+                .name(ComponentUtils.colored(toggled ? nameToggled : nameDefault, NamedTextColor.YELLOW))
+                .onToggle(player -> toggleAction.run())
+                .build();
+    }
+
+    public int[] getSlots(int startRow, int endRow, int startCol, int endCol) {
         List<Integer> slots = new ArrayList<>();
         for (int row = startRow; row <= endRow; row++) {
             for (int col = startCol; col <= endCol; col++) {
@@ -75,7 +87,7 @@ public class MenuUtils {
         return slots.stream().mapToInt(Integer::intValue).toArray();
     }
 
-    public static int[] getBorderSlots(int size) {
+    public int[] getBorderSlots(int size) {
         List<Integer> slots = new ArrayList<>();
         int rows = size / 9;
 
@@ -93,7 +105,7 @@ public class MenuUtils {
         return slots.stream().mapToInt(Integer::intValue).toArray();
     }
 
-    public static void playClickSound(Player player) {
+    public void playClickSound(Player player) {
         player.playSound(player.getLocation(), "ui.button.click", 0.5f, 1.0f);
     }
 }

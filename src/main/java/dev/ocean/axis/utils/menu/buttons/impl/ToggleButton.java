@@ -1,33 +1,55 @@
 package dev.ocean.axis.utils.menu.buttons.impl;
 
 import dev.ocean.axis.utils.menu.buttons.AbstractButton;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
+@Getter
+@Setter
 public class ToggleButton extends AbstractButton {
-    @Getter
     private boolean toggled;
     private ItemStack toggledItem;
     private Consumer<Player> onToggle;
 
-    public ToggleButton(ItemStack defaultItem, ItemStack toggledItem) {
-        super(defaultItem);
-        this.toggledItem = toggledItem.clone();
-        this.toggled = false;
-    }
-
-    public ToggleButton setOnToggle(Consumer<Player> onToggle) {
+    @Builder
+    public ToggleButton(ItemStack itemStack,
+                        ItemStack toggledItem,
+                        boolean toggled,
+                        boolean clickable,
+                        Consumer<Player> leftClick,
+                        Consumer<Player> rightClick,
+                        Consumer<Player> shiftLeftClick,
+                        Consumer<Player> shiftRightClick,
+                        Consumer<Player> middleClick,
+                        Consumer<Player> doubleClick,
+                        Consumer<Player> dropClick,
+                        Map<ClickType, Consumer<Player>> customActions,
+                        Component name,
+                        List<Component> lore,
+                        Consumer<Player> onToggle,
+                        int amount) {
+        super(itemStack, clickable, leftClick, rightClick, shiftLeftClick, shiftRightClick, middleClick, doubleClick, dropClick, customActions, name, lore, amount);
+        this.toggledItem = toggledItem != null ? toggledItem.clone() : null;
+        this.toggled = toggled;
         this.onToggle = onToggle;
-        return this;
+        if (toggled) {
+            this.itemStack = this.toggledItem != null ? this.toggledItem.clone() : this.itemStack;
+        }
     }
 
     public void toggle() {
         toggled = !toggled;
-        itemStack = toggled ? toggledItem.clone() : getItemStack();
+        itemStack = toggled ? (toggledItem != null ? toggledItem.clone() : itemStack) : (itemStack != null ? itemStack.clone() : null);
+        applyMeta();
     }
 
     @Override

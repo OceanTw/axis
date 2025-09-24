@@ -46,7 +46,9 @@ public abstract class Tool {
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
-            meta.displayName(Component.text(displayName).color(NamedTextColor.AQUA));
+            meta.displayName(Component.text(displayName)
+                    .color(NamedTextColor.AQUA)
+                    .decoration(TextDecoration.ITALIC, false));
             meta.lore(createItemLore());
 
             PersistentDataContainer data = meta.getPersistentDataContainer();
@@ -199,18 +201,56 @@ public abstract class Tool {
     }
 
     protected List<Component> createItemLore() {
-        return List.of(
-                Component.text(description).color(NamedTextColor.GRAY),
-                Component.empty(),
-                Component.text("LEFT CLICK: ").color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD)
-                        .append(Component.text(getLeftClickDescription()).color(NamedTextColor.WHITE)),
-                Component.empty(),
-                Component.text("RIGHT CLICK: ").color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD)
-                        .append(Component.text(getRightClickDescription()).color(NamedTextColor.WHITE)),
-                Component.empty(),
-                Component.text("F + LEFT CLICK: Configure Settings").color(NamedTextColor.GOLD)
-        );
+        List<Component> lore = new ArrayList<>();
+        // Description
+        lore.add(Component.text("✦ " + description)
+                .color(NamedTextColor.GRAY)
+                .decoration(TextDecoration.ITALIC, false));
+        lore.add(Component.empty());
+
+        // Left Click
+        lore.add(Component.text("⬅ ")
+                .color(NamedTextColor.YELLOW)
+                .decorate(TextDecoration.BOLD)
+                .decoration(TextDecoration.ITALIC, false)
+                .append(Component.text("ʟᴇꜰᴛ ᴄʟɪᴄᴋ ")
+                        .color(NamedTextColor.YELLOW)
+                        .decorate(TextDecoration.BOLD)
+                        .decoration(TextDecoration.ITALIC, false))
+                .append(Component.text(getLeftClickDescription())
+                        .color(NamedTextColor.WHITE)
+                        .decoration(TextDecoration.ITALIC, false)));
+
+        // Right Click
+        lore.add(Component.text("➡ ")
+                .color(NamedTextColor.YELLOW)
+                .decorate(TextDecoration.BOLD)
+                .decoration(TextDecoration.ITALIC, false)
+                .append(Component.text("ʀɪɢʜᴛ ᴄʟɪᴄᴋ ")
+                        .color(NamedTextColor.YELLOW)
+                        .decorate(TextDecoration.BOLD)
+                        .decoration(TextDecoration.ITALIC, false))
+                .append(Component.text(getRightClickDescription())
+                        .color(NamedTextColor.WHITE)
+                        .decoration(TextDecoration.ITALIC, false)));
+
+        lore.add(Component.empty());
+
+        // Configure Settings
+        lore.add(Component.text("⚙ ")
+                .color(NamedTextColor.GOLD)
+                .decoration(TextDecoration.ITALIC, false)
+                .append(Component.text("ѕᴡᴀᴘ ᴛᴏ ᴏꜰꜰʜᴀɴᴅ: ")
+                        .color(NamedTextColor.GOLD)
+                        .decoration(TextDecoration.ITALIC, false)
+                        .decorate(TextDecoration.BOLD))
+                .append(Component.text("ᴏᴘᴇɴ ꜱᴇᴛᴛɪɴɢꜱ ᴍᴇɴᴜ")
+                        .color(NamedTextColor.WHITE)
+                        .decoration(TextDecoration.ITALIC, false)));
+
+        return lore;
     }
+
 
     protected String getLeftClickDescription() {
         return "Primary action";

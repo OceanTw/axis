@@ -8,8 +8,8 @@ import java.util.List;
 
 public class PaginatedMenu extends AbstractMenu {
     private int currentPage;
-    private final int maxPage;
-    private final List<Button> items;
+    private int maxPage;
+    private List<Button> items;
     private final int[] itemSlots;
     private Button previousButton;
     private Button nextButton;
@@ -20,7 +20,7 @@ public class PaginatedMenu extends AbstractMenu {
         super(title, size);
         this.items = new ArrayList<>(items);
         this.itemSlots = generateItemSlots();
-        this.maxPage = (int) Math.ceil((double) items.size() / itemSlots.length) - 1;
+        recalculateMaxPage();
         this.currentPage = 0;
         setupPage();
     }
@@ -29,7 +29,7 @@ public class PaginatedMenu extends AbstractMenu {
         super(title, size);
         this.items = new ArrayList<>(items);
         this.itemSlots = customItemSlots;
-        this.maxPage = (int) Math.ceil((double) items.size() / itemSlots.length) - 1;
+        recalculateMaxPage();
         this.currentPage = 0;
         setupPage();
     }
@@ -43,6 +43,10 @@ public class PaginatedMenu extends AbstractMenu {
             }
         }
         return slots.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private void recalculateMaxPage() {
+        this.maxPage = items.isEmpty() ? 0 : (int) Math.ceil((double) items.size() / itemSlots.length) - 1;
     }
 
     public void nextPage() {
@@ -101,23 +105,32 @@ public class PaginatedMenu extends AbstractMenu {
         }
     }
 
-    public int getCurrentPage() {
-        return currentPage;
-    }
-
-    public int getMaxPage() {
-        return maxPage;
-    }
-
     public void addItem(Button button) {
         items.add(button);
+        recalculateMaxPage();
         setupPage();
     }
 
     public void removeItem(int index) {
         if (index >= 0 && index < items.size()) {
             items.remove(index);
+            recalculateMaxPage();
             setupPage();
         }
+    }
+
+    public void setItems(List<Button> newItems) {
+        this.items = new ArrayList<>(newItems);
+        recalculateMaxPage();
+        if (currentPage > maxPage) currentPage = maxPage;
+        setupPage();
+    }
+
+    public void refresh() {
+        setupPage();
+    }
+
+    public List<Button> getItems() {
+        return new ArrayList<>(items);
     }
 }
