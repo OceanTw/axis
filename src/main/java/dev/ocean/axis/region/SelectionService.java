@@ -31,7 +31,7 @@ public class SelectionService {
         playerSelections.remove(playerUUID);
     }
 
-    // Cube-specific helpers
+    // square selection specific methods
     public void setPos1(UUID playerUUID, Location location) {
         Selection sel = playerSelections.computeIfAbsent(playerUUID, id -> new CubeSelection());
         if (sel instanceof CubeSelection cube) {

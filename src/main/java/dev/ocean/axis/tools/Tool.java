@@ -229,7 +229,6 @@ public abstract class Tool {
 
         lore.add(Component.empty());
 
-        // Configure Settings
         lore.add(Component.text("⚙ ")
                 .color(NamedTextColor.GOLD)
                 .decoration(TextDecoration.ITALIC, false)
