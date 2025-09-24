@@ -14,7 +14,9 @@ import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class FillTool extends Tool {
@@ -59,7 +61,7 @@ public class FillTool extends Tool {
         Location pos1 = selection.getPos1(player.getUniqueId());
         Location pos2 = selection.getPos2(player.getUniqueId());
 
-        // Save snapshot for undo
+        // save snapshot for undo
         CuboidSnapshot.create(pos1, pos2).thenAccept(snapshot -> HistoryService.get().add(player, snapshot));
 
         selectionOptional.getBlocksAsync().thenAccept(locations -> {
@@ -110,7 +112,6 @@ public class FillTool extends Tool {
             }
         }
 
-        // Fallback: return any one of the materials
         return materialPercentages.keySet().iterator().next();
     }
 

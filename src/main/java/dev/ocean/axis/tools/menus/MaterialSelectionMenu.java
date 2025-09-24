@@ -1,6 +1,5 @@
 package dev.ocean.axis.tools.menus;
 
-import dev.ocean.axis.tools.ToolSettings;
 import dev.ocean.axis.utils.ComponentUtils;
 import dev.ocean.axis.utils.menu.MenuUtils;
 import dev.ocean.axis.utils.menu.buttons.Button;
@@ -12,7 +11,10 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 public class MaterialSelectionMenu extends PaginatedMenu {
 
@@ -53,7 +55,6 @@ public class MaterialSelectionMenu extends PaginatedMenu {
         fillBorder(MenuUtils.createFillerButton(Material.BLACK_STAINED_GLASS_PANE));
         setButton(45, MenuUtils.createBackButton(parentMenu));
         setButton(53, createClearAllButton());
-        // Paginated navigation
         setPaginationButtons(
                 MenuUtils.createPreviousPageButton(this),
                 MenuUtils.createNextPageButton(this),

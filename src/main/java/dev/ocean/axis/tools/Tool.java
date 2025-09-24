@@ -14,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
 
@@ -121,7 +120,6 @@ public abstract class Tool {
                 }
             } else if (value instanceof Map<?, ?> map) {
                 if (!map.isEmpty() && map.keySet().iterator().next() instanceof Material) {
-                    // Serialize Map<Material, Double>
                     Map<Material, Double> materialMap = (Map<Material, Double>) map;
                     StringBuilder serialized = new StringBuilder();
                     for (Map.Entry<Material, Double> entry : materialMap.entrySet()) {
@@ -173,7 +171,6 @@ public abstract class Tool {
             } else if (defaultValue instanceof Map<?, ?>) {
                 String stored = data.get(settingKey, PersistentDataType.STRING);
                 if (stored != null && !stored.isEmpty()) {
-                    // Deserialize Map<Material, Double>
                     Map<Material, Double> materialMap = new HashMap<>();
                     String[] entries = stored.split(";");
                     for (String entry : entries) {
@@ -184,7 +181,6 @@ public abstract class Tool {
                                 Double percentage = Double.valueOf(parts[1]);
                                 materialMap.put(material, percentage);
                             } catch (Exception e) {
-                                // Skip invalid entries
                             }
                         }
                     }
@@ -202,13 +198,11 @@ public abstract class Tool {
 
     protected List<Component> createItemLore() {
         List<Component> lore = new ArrayList<>();
-        // Description
         lore.add(Component.text("✦ " + description)
                 .color(NamedTextColor.GRAY)
                 .decoration(TextDecoration.ITALIC, false));
         lore.add(Component.empty());
 
-        // Left Click
         lore.add(Component.text("⬅ ")
                 .color(NamedTextColor.YELLOW)
                 .decorate(TextDecoration.BOLD)
@@ -221,7 +215,6 @@ public abstract class Tool {
                         .color(NamedTextColor.WHITE)
                         .decoration(TextDecoration.ITALIC, false)));
 
-        // Right Click
         lore.add(Component.text("➡ ")
                 .color(NamedTextColor.YELLOW)
                 .decorate(TextDecoration.BOLD)

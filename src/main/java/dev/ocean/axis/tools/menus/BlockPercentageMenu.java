@@ -1,6 +1,5 @@
 package dev.ocean.axis.tools.menus;
 
-import dev.ocean.axis.tools.ToolSettings;
 import dev.ocean.axis.utils.ComponentUtils;
 import dev.ocean.axis.utils.PlayerUtils;
 import dev.ocean.axis.utils.menu.MenuUtils;
@@ -68,7 +67,6 @@ public class BlockPercentageMenu extends PaginatedMenu {
         setButton(45, createBackButton());
         setButton(53, createClearAllButton());
         setButton(49, createNormalizeButton());
-        // Paginated navigation
         setPaginationButtons(
                 MenuUtils.createPreviousPageButton(this),
                 MenuUtils.createNextPageButton(this),

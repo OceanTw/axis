@@ -1,6 +1,7 @@
 package dev.ocean.axis.tools;
 
 import org.bukkit.Material;
+
 import java.util.*;
 
 public class ToolSettings {
@@ -37,7 +38,6 @@ public class ToolSettings {
         return new HashMap<>(settings);
     }
 
-    // Common setting helpers
     public List<Material> getMaterials(String key) {
         return get(key, new ArrayList<Material>());
     }

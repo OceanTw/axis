@@ -5,7 +5,6 @@ import dev.ocean.axis.tools.Tool;
 import dev.ocean.axis.tools.ToolSettings;
 import dev.ocean.axis.utils.PlayerUtils;
 import lombok.NonNull;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

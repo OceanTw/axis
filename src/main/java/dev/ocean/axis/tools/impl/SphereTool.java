@@ -13,7 +13,9 @@ import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SphereTool extends Tool {
@@ -86,7 +88,7 @@ public class SphereTool extends Tool {
             return false;
         }
 
-        // Save history for undo
+        // save history for undo
         CuboidSnapshot.create(center.clone().add(-radius, -radius, -radius),
                         center.clone().add(radius, radius, radius))
                 .thenAccept(snapshot -> HistoryService.get().add(player, snapshot));

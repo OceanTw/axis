@@ -6,7 +6,10 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.bukkit.Location;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Getter
