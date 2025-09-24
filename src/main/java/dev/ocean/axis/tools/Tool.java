@@ -1,6 +1,7 @@
 package dev.ocean.axis.tools;
 
 import dev.ocean.axis.AxisPlugin;
+import dev.ocean.axis.utils.ComponentUtils;
 import lombok.Getter;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
@@ -45,16 +46,13 @@ public abstract class Tool {
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
-            meta.displayName(Component.text(displayName)
-                    .color(NamedTextColor.AQUA)
-                    .decoration(TextDecoration.ITALIC, false));
+            meta.displayName(ComponentUtils.colored(displayName, NamedTextColor.AQUA));
             meta.lore(createItemLore());
 
             PersistentDataContainer data = meta.getPersistentDataContainer();
             data.set(getToolIdKey(), PersistentDataType.STRING, name);
 
             saveSettingsToItem(meta, defaultSettings);
-
             item.setItemMeta(meta);
         }
 
@@ -74,19 +72,15 @@ public abstract class Tool {
 
     public ToolSettings getItemSettings(ItemStack item) {
         if (!matches(item)) return createDefaultSettings();
-
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return createDefaultSettings();
-
         return loadSettingsFromItem(meta);
     }
 
     public void saveItemSettings(ItemStack item, ToolSettings settings) {
         if (!matches(item)) return;
-
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
-
         saveSettingsToItem(meta, settings);
         item.setItemMeta(meta);
     }
@@ -111,15 +105,14 @@ public abstract class Tool {
             } else if (value instanceof List<?>) {
                 List<?> list = (List<?>) value;
                 if (!list.isEmpty() && list.get(0) instanceof Material) {
+                    @SuppressWarnings("unchecked")
                     List<Material> materials = (List<Material>) list;
-                    String serialized = materials.stream()
-                            .map(Material::name)
-                            .reduce((a, b) -> a + "," + b)
-                            .orElse("");
+                    String serialized = String.join(",", materials.stream().map(Material::name).toList());
                     data.set(settingKey, PersistentDataType.STRING, serialized);
                 }
             } else if (value instanceof Map<?, ?> map) {
                 if (!map.isEmpty() && map.keySet().iterator().next() instanceof Material) {
+                    @SuppressWarnings("unchecked")
                     Map<Material, Double> materialMap = (Map<Material, Double>) map;
                     StringBuilder serialized = new StringBuilder();
                     for (Map.Entry<Material, Double> entry : materialMap.entrySet()) {
@@ -142,24 +135,16 @@ public abstract class Tool {
 
             if (defaultValue instanceof Boolean) {
                 Byte stored = data.get(settingKey, PersistentDataType.BYTE);
-                if (stored != null) {
-                    settings.set(key, stored == 1);
-                }
+                if (stored != null) settings.set(key, stored == 1);
             } else if (defaultValue instanceof Integer) {
                 Integer stored = data.get(settingKey, PersistentDataType.INTEGER);
-                if (stored != null) {
-                    settings.set(key, stored);
-                }
+                if (stored != null) settings.set(key, stored);
             } else if (defaultValue instanceof Double) {
                 Double stored = data.get(settingKey, PersistentDataType.DOUBLE);
-                if (stored != null) {
-                    settings.set(key, stored);
-                }
+                if (stored != null) settings.set(key, stored);
             } else if (defaultValue instanceof String) {
                 String stored = data.get(settingKey, PersistentDataType.STRING);
-                if (stored != null) {
-                    settings.set(key, stored);
-                }
+                if (stored != null) settings.set(key, stored);
             } else if (defaultValue instanceof List<?>) {
                 String stored = data.get(settingKey, PersistentDataType.STRING);
                 if (stored != null && !stored.isEmpty()) {
@@ -180,7 +165,7 @@ public abstract class Tool {
                                 Material material = Material.valueOf(parts[0]);
                                 Double percentage = Double.valueOf(parts[1]);
                                 materialMap.put(material, percentage);
-                            } catch (Exception e) {
+                            } catch (Exception ignored) {
                             }
                         }
                     }
@@ -198,51 +183,24 @@ public abstract class Tool {
 
     protected List<Component> createItemLore() {
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("✦ " + description)
-                .color(NamedTextColor.GRAY)
-                .decoration(TextDecoration.ITALIC, false));
+        lore.add(ComponentUtils.colored("✦ " + description, NamedTextColor.GRAY));
         lore.add(Component.empty());
 
-        lore.add(Component.text("⬅ ")
-                .color(NamedTextColor.YELLOW)
+        lore.add(ComponentUtils.colored("⬅ ʟᴇꜰᴛ ᴄʟɪᴄᴋ ", NamedTextColor.YELLOW, false)
                 .decorate(TextDecoration.BOLD)
-                .decoration(TextDecoration.ITALIC, false)
-                .append(Component.text("ʟᴇꜰᴛ ᴄʟɪᴄᴋ ")
-                        .color(NamedTextColor.YELLOW)
-                        .decorate(TextDecoration.BOLD)
-                        .decoration(TextDecoration.ITALIC, false))
-                .append(Component.text(getLeftClickDescription())
-                        .color(NamedTextColor.WHITE)
-                        .decoration(TextDecoration.ITALIC, false)));
+                .append(ComponentUtils.colored(getLeftClickDescription(), NamedTextColor.WHITE)));
 
-        lore.add(Component.text("➡ ")
-                .color(NamedTextColor.YELLOW)
+        lore.add(ComponentUtils.colored("➡ ʀɪɢʜᴛ ᴄʟɪᴄᴋ ", NamedTextColor.YELLOW, false)
                 .decorate(TextDecoration.BOLD)
-                .decoration(TextDecoration.ITALIC, false)
-                .append(Component.text("ʀɪɢʜᴛ ᴄʟɪᴄᴋ ")
-                        .color(NamedTextColor.YELLOW)
-                        .decorate(TextDecoration.BOLD)
-                        .decoration(TextDecoration.ITALIC, false))
-                .append(Component.text(getRightClickDescription())
-                        .color(NamedTextColor.WHITE)
-                        .decoration(TextDecoration.ITALIC, false)));
+                .append(ComponentUtils.colored(getRightClickDescription(), NamedTextColor.WHITE)));
 
         lore.add(Component.empty());
 
-        lore.add(Component.text("⚙ ")
-                .color(NamedTextColor.GOLD)
-                .decoration(TextDecoration.ITALIC, false)
-                .append(Component.text("ѕᴡᴀᴘ ᴛᴏ ᴏꜰꜰʜᴀɴᴅ: ")
-                        .color(NamedTextColor.GOLD)
-                        .decoration(TextDecoration.ITALIC, false)
-                        .decorate(TextDecoration.BOLD))
-                .append(Component.text("ᴏᴘᴇɴ ꜱᴇᴛᴛɪɴɢꜱ ᴍᴇɴᴜ")
-                        .color(NamedTextColor.WHITE)
-                        .decoration(TextDecoration.ITALIC, false)));
-
+        lore.add(ComponentUtils.colored("⚙ ѕᴡᴀᴘ ᴛᴏ ᴏꜰꜰʜᴀɴᴅ: ", NamedTextColor.GOLD)
+                .decorate(TextDecoration.BOLD)
+                .append(ComponentUtils.colored("ᴏᴘᴇɴ ꜱᴇᴛᴛɪɴɢꜱ ᴍᴇɴᴜ", NamedTextColor.WHITE)));
         return lore;
     }
-
 
     protected String getLeftClickDescription() {
         return "Primary action";
@@ -253,10 +211,10 @@ public abstract class Tool {
     }
 
     public Component getDisplayComponent() {
-        return Component.text(displayName).color(NamedTextColor.AQUA);
+        return ComponentUtils.colored(displayName, NamedTextColor.AQUA);
     }
 
     public Component getDescriptionComponent() {
-        return Component.text(description).color(NamedTextColor.GRAY);
+        return ComponentUtils.colored(description, NamedTextColor.GRAY);
     }
 }

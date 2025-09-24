@@ -1,6 +1,5 @@
 package dev.ocean.axis.utils.menu.buttons;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
@@ -16,11 +15,9 @@ import java.util.function.Consumer;
 
 @Getter
 @Setter
-@Builder
 public abstract class AbstractButton implements Button {
     protected ItemStack itemStack;
-    @Builder.Default
-    protected boolean clickable = true;
+    protected boolean clickable;
     protected Consumer<Player> leftClick;
     protected Consumer<Player> rightClick;
     protected Consumer<Player> shiftLeftClick;
@@ -28,8 +25,7 @@ public abstract class AbstractButton implements Button {
     protected Consumer<Player> middleClick;
     protected Consumer<Player> doubleClick;
     protected Consumer<Player> dropClick;
-    @Builder.Default
-    protected Map<ClickType, Consumer<Player>> customActions = new HashMap<>();
+    protected Map<ClickType, Consumer<Player>> customActions;
     protected Component name;
     protected List<Component> lore;
     protected int amount;

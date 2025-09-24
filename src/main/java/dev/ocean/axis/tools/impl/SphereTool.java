@@ -125,7 +125,7 @@ public class SphereTool extends Tool {
 
     @Override
     public boolean canUse(@NonNull Player player) {
-        return player.hasPermission("axis.tools.sphere") || player.isOp(); // configurable
+        return player.hasPermission("axis.tools.sphere") || player.isOp();
     }
 
     @Override
@@ -135,12 +135,26 @@ public class SphereTool extends Tool {
         settings.set("distance", 8);
         settings.set("hollow", false);
         settings.set("replace_air_only", false);
-        settings.set("blocks", Material.STONE);
+
+        Map<Material, Double> defaultBlocks = new HashMap<>();
+        defaultBlocks.put(Material.STONE, 100.0);
+        settings.setMaterialPercentages("blocks", defaultBlocks);
+
         return settings;
     }
 
     @Override
     public Set<String> getConfigurableSettings() {
         return Set.of("blocks", "replace_air_only", "hollow", "radius");
+    }
+
+    @Override
+    protected String getLeftClickDescription() {
+        return "Undo last action";
+    }
+
+    @Override
+    protected String getRightClickDescription() {
+        return "Create sphere with configured settings";
     }
 }

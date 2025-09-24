@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Getter
 @Setter
-@Accessors
+@Accessors(chain = true)
 public class CubeSelection extends Selection {
     private Location pos1;
     private Location pos2;
