@@ -10,12 +10,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.plugin.Plugin;
 
 public class MenuListener implements Listener {
-    private final Plugin plugin;
-
-    public MenuListener() {
-        this.plugin = AxisPlugin.getInstance();
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
-    }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {

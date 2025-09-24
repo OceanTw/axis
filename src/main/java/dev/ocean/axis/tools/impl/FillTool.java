@@ -27,9 +27,15 @@ public class FillTool extends Tool {
 
     @Override
     public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
-        HistoryService.get().undo(player);
+        if (HistoryService.get().getHistory(player).isEmpty()) {
+            PlayerUtils.sendInfo(player, "No actions to undo!");
+            PlayerUtils.playSoundInfo(player);
+            return true;
+        }
+        HistoryService.get().undo(player).restore(true);
         PlayerUtils.sendInfo(player, "Undid 1 action");
         PlayerUtils.playSoundInfo(player);
+
         return true;
     }
 
@@ -95,6 +101,11 @@ public class FillTool extends Tool {
     }
 
     private Material selectMaterialByPercentage(Map<Material, Double> materialPercentages) {
+        // Calculate total percentage
+        double totalPercentage = materialPercentages.values().stream()
+                .mapToDouble(Double::doubleValue)
+                .sum();
+
         double random = ThreadLocalRandom.current().nextDouble() * 100.0;
         double cumulative = 0.0;
 
@@ -105,10 +116,13 @@ public class FillTool extends Tool {
             }
         }
 
-        // Fallback to first material
+        // for cases where the total percentage is less than 100%
+        if (totalPercentage < 100.0 && random > totalPercentage) {
+            return null;
+        }
+
         return materialPercentages.keySet().iterator().next();
     }
-
     @Override
     public boolean canUse(@NonNull Player player) {
         return player.hasPermission("axis.tools.fill") || player.isOp();

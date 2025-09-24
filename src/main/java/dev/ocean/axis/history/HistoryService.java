@@ -22,7 +22,11 @@ public class HistoryService {
     }
 
     public void add(Player player, CuboidSnapshot action) {
-        getHistory(player.getUniqueId()).push(action);
+        getHistory(player.getUniqueId()).push(action.clone());
+    }
+
+    public List<CuboidSnapshot> getHistory(Player player) {
+        return new ArrayList<>(getHistory(player.getUniqueId()));
     }
 
     public CuboidSnapshot undo(Player player) {

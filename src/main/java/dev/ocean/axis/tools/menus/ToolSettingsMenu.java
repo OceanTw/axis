@@ -13,13 +13,13 @@ import java.util.*;
 
 public class ToolSettingsMenu extends AbstractMenu {
 
-    private final Tool tool;
+    final Tool tool;
     protected final ToolSettings settings;
     private final Player player;
-    private final ItemStack toolItem;
+    final ItemStack toolItem;
 
     public ToolSettingsMenu(Player player, Tool tool, ItemStack toolItem) {
-        super("§8Tool Settings - " + tool.getName(), 54);
+        super("§8Tool Settings - " + tool.getDisplayName(), 54);
         this.player = player;
         this.tool = tool;
         this.toolItem = toolItem;
@@ -48,7 +48,7 @@ public class ToolSettingsMenu extends AbstractMenu {
                 .itemStack(tool.getItem())
                 .clickable(false)
                 .build()
-                .name("§6" + tool.getName())
+                .name("§6" + tool.getDisplayName())
                 .lore("§7Tool Settings Configuration", "", "§eModify your tool settings below")
                 .build();
     }
@@ -93,8 +93,8 @@ public class ToolSettingsMenu extends AbstractMenu {
                 .itemStack(new ItemStack(material))
                 .leftClick(p -> {
                     settings.set(key, !value);
-                    refresh();
-                    setupSettingButtons();
+                    tool.saveItemSettings(toolItem, settings); // Save to ItemStack
+                    setupMenu(); // Use setupMenu instead of refresh + setupSettingButtons
                 })
                 .build()
                 .name("§6" + formatKey(key))
@@ -107,23 +107,23 @@ public class ToolSettingsMenu extends AbstractMenu {
                 .itemStack(new ItemStack(Material.PAPER))
                 .leftClick(p -> {
                     settings.set(key, Math.min(value + 1, getMaxValue(key)));
-                    refresh();
-                    setupSettingButtons();
+                    tool.saveItemSettings(toolItem, settings); // Save to ItemStack
+                    setupMenu();
                 })
                 .rightClick(p -> {
                     settings.set(key, Math.max(value - 1, getMinValue(key)));
-                    refresh();
-                    setupSettingButtons();
+                    tool.saveItemSettings(toolItem, settings); // Save to ItemStack
+                    setupMenu();
                 })
                 .shiftLeftClick(p -> {
                     settings.set(key, Math.min(value + 10, getMaxValue(key)));
-                    refresh();
-                    setupSettingButtons();
+                    tool.saveItemSettings(toolItem, settings); // Save to ItemStack
+                    setupMenu();
                 })
                 .shiftRightClick(p -> {
                     settings.set(key, Math.max(value - 10, getMinValue(key)));
-                    refresh();
-                    setupSettingButtons();
+                    tool.saveItemSettings(toolItem, settings); // Save to ItemStack
+                    setupMenu();
                 })
                 .build()
                 .name("§6" + formatKey(key))
@@ -137,23 +137,23 @@ public class ToolSettingsMenu extends AbstractMenu {
                 .itemStack(new ItemStack(Material.PAPER))
                 .leftClick(p -> {
                     settings.set(key, Math.min(value + 0.1, getMaxDoubleValue(key)));
-                    refresh();
-                    setupSettingButtons();
+                    tool.saveItemSettings(toolItem, settings); // Save to ItemStack
+                    setupMenu();
                 })
                 .rightClick(p -> {
                     settings.set(key, Math.max(value - 0.1, getMinDoubleValue(key)));
-                    refresh();
-                    setupSettingButtons();
+                    tool.saveItemSettings(toolItem, settings); // Save to ItemStack
+                    setupMenu();
                 })
                 .shiftLeftClick(p -> {
                     settings.set(key, Math.min(value + 1.0, getMaxDoubleValue(key)));
-                    refresh();
-                    setupSettingButtons();
+                    tool.saveItemSettings(toolItem, settings); // Save to ItemStack
+                    setupMenu();
                 })
                 .shiftRightClick(p -> {
                     settings.set(key, Math.max(value - 1.0, getMinDoubleValue(key)));
-                    refresh();
-                    setupSettingButtons();
+                    tool.saveItemSettings(toolItem, settings); // Save to ItemStack
+                    setupMenu();
                 })
                 .build()
                 .name("§6" + formatKey(key))
@@ -220,8 +220,8 @@ public class ToolSettingsMenu extends AbstractMenu {
                             settings.set(key, defaultValue);
                         }
                     }
-                    refresh();
-                    setupSettingButtons();
+                    tool.saveItemSettings(toolItem, settings); // Save to ItemStack
+                    setupMenu(); // Use setupMenu instead of refresh + setupSettingButtons
                     player.sendMessage("§aSettings reset to defaults!");
                 })
                 .build()
@@ -294,6 +294,12 @@ class MaterialSelectionMenu extends AbstractMenu {
                 .filter(Material::isItem) // Only materials that can be items
                 .sorted(Comparator.comparing(Material::name))
                 .toList();
+        setOnClose(p -> {
+            // Auto-save when menu closes
+            parentMenu.settings.setMaterials(settingKey, selectedMaterials);
+            // Save to the actual ItemStack
+            parentMenu.tool.saveItemSettings(parentMenu.toolItem, parentMenu.settings);
+        });
         setupMenu();
     }
 
@@ -302,17 +308,22 @@ class MaterialSelectionMenu extends AbstractMenu {
     }
 
     private void setupMenu() {
+        // Clear all slots first
+        for (int i = 0; i < 54; i++) {
+            removeButton(i);
+        }
+
         fillBorder(MenuUtils.createFillerButton(Material.BLACK_STAINED_GLASS_PANE));
 
         setButton(45, MenuUtils.createBackButton(parentMenu));
-        setButton(49, createSaveButton());
         setButton(53, createClearAllButton());
 
         if (currentPage > 0) {
             setButton(48, createPreviousPageButton());
         }
 
-        if ((currentPage + 1) * materialsPerPage < allMaterials.size()) {
+        int totalPages = (int) Math.ceil((double) allMaterials.size() / materialsPerPage);
+        if (currentPage < totalPages - 1) {
             setButton(50, createNextPageButton());
         }
 
@@ -320,6 +331,14 @@ class MaterialSelectionMenu extends AbstractMenu {
     }
 
     private void setupMaterialButtons() {
+        // Clear all material slots first
+        for (int row = 1; row < 5; row++) {
+            for (int col = 1; col < 8; col++) {
+                int slot = row * 9 + col;
+                removeButton(slot);
+            }
+        }
+
         int startIndex = currentPage * materialsPerPage;
         int endIndex = Math.min(startIndex + materialsPerPage, allMaterials.size());
 
@@ -337,7 +356,14 @@ class MaterialSelectionMenu extends AbstractMenu {
     }
 
     private Button createMaterialButton(Material material, boolean selected) {
-        ItemStack item = new ItemStack(material);
+        ItemStack item;
+        try {
+            item = new ItemStack(material);
+        } catch (IllegalArgumentException e) {
+            // Skip materials that can't be items
+            return null;
+        }
+
         String status = selected ? "§aSelected" : "§7Not Selected";
 
         return ButtonBuilder.builder()
@@ -348,8 +374,7 @@ class MaterialSelectionMenu extends AbstractMenu {
                     } else {
                         selectedMaterials.add(material);
                     }
-                    refresh();
-                    setupMenu();
+                    setupMenu(); // Use setupMenu to refresh the entire menu
                 })
                 .build()
                 .name("§6" + material.name())
@@ -389,12 +414,11 @@ class MaterialSelectionMenu extends AbstractMenu {
                 .itemStack(new ItemStack(Material.ARROW))
                 .leftClick(p -> {
                     currentPage--;
-                    refresh();
                     setupMenu();
                 })
                 .build()
                 .name("§ePrevious Page")
-                .lore("§7Page " + currentPage + "/" + (allMaterials.size() / materialsPerPage))
+                .lore("§7Page " + (currentPage + 1) + "/" + (int) Math.ceil((double) allMaterials.size() / materialsPerPage))
                 .build();
     }
 
@@ -403,12 +427,11 @@ class MaterialSelectionMenu extends AbstractMenu {
                 .itemStack(new ItemStack(Material.ARROW))
                 .leftClick(p -> {
                     currentPage++;
-                    refresh();
                     setupMenu();
                 })
                 .build()
                 .name("§eNext Page")
-                .lore("§7Page " + (currentPage + 2) + "/" + ((allMaterials.size() / materialsPerPage) + 1))
+                .lore("§7Page " + (currentPage + 1) + "/" + (int) Math.ceil((double) allMaterials.size() / materialsPerPage))
                 .build();
     }
 }
@@ -433,24 +456,51 @@ class BlockPercentageMenu extends AbstractMenu {
                 .filter(Material::isBlock)
                 .filter(mat -> !mat.isAir())
                 .filter(Material::isItem) // Only materials that can be items
-                .sorted(Comparator.comparing(Material::name))
+                .sorted((mat1, mat2) -> {
+                    // First, sort by whether they have percentages (materials with percentages first)
+                    boolean mat1HasPercentage = blocks.containsKey(mat1) && blocks.get(mat1) > 0;
+                    boolean mat2HasPercentage = blocks.containsKey(mat2) && blocks.get(mat2) > 0;
+
+                    if (mat1HasPercentage && !mat2HasPercentage) {
+                        return -1; // mat1 comes first
+                    } else if (!mat1HasPercentage && mat2HasPercentage) {
+                        return 1; // mat2 comes first
+                    } else if (mat1HasPercentage && mat2HasPercentage) {
+                        // Both have percentages, sort by percentage value (highest first)
+                        return Double.compare(blocks.get(mat2), blocks.get(mat1));
+                    } else {
+                        // Neither has percentages, sort alphabetically
+                        return mat1.name().compareTo(mat2.name());
+                    }
+                })
                 .toList();
+        setOnClose(p -> {
+            // Auto-save when menu closes
+            parentMenu.settings.set(settingKey, blocks);
+            // Save to the actual ItemStack
+            parentMenu.tool.saveItemSettings(parentMenu.toolItem, parentMenu.settings);
+        });
         setupMenu();
     }
 
     private void setupMenu() {
+        // Clear all slots first
+        for (int i = 0; i < 54; i++) {
+            removeButton(i);
+        }
+
         fillBorder(MenuUtils.createFillerButton(Material.BLACK_STAINED_GLASS_PANE));
 
-        setButton(45, MenuUtils.createBackButton(parentMenu));
-        setButton(49, createSaveButton());
+        setButton(45, createBackButton());
         setButton(53, createClearAllButton());
-        setButton(47, createNormalizeButton());
+        setButton(49, createNormalizeButton());
 
+        int totalPages = (int) Math.ceil((double) allMaterials.size() / materialsPerPage);
         if (currentPage > 0) {
             setButton(46, createPreviousPageButton());
         }
 
-        if ((currentPage + 1) * materialsPerPage < allMaterials.size()) {
+        if (currentPage < totalPages - 1) {
             setButton(52, createNextPageButton());
         }
 
@@ -458,6 +508,14 @@ class BlockPercentageMenu extends AbstractMenu {
     }
 
     private void setupMaterialButtons() {
+        // Clear all material slots first
+        for (int row = 1; row < 5; row++) {
+            for (int col = 1; col < 8; col++) {
+                int slot = row * 9 + col;
+                removeButton(slot);
+            }
+        }
+
         int startIndex = currentPage * materialsPerPage;
         int endIndex = Math.min(startIndex + materialsPerPage, allMaterials.size());
 
@@ -466,16 +524,14 @@ class BlockPercentageMenu extends AbstractMenu {
             Material material = allMaterials.get(i);
             double percentage = blocks.getOrDefault(material, 0.0);
 
-            if (percentage > 0 || currentPage == 0) { // Show on first page or if has percentage
-                Button button = createMaterialButton(material, percentage);
-                if (button != null) { // Only set button if it was created successfully
-                    setButton(slot, button);
-                }
-
-                slot++;
-                if (slot % 9 == 8) slot += 2;
-                if (slot >= 44) break;
+            Button button = createMaterialButton(material, percentage);
+            if (button != null) { // Only set button if it was created successfully
+                setButton(slot, button);
             }
+
+            slot++;
+            if (slot % 9 == 8) slot += 2;
+            if (slot >= 44) break;
         }
     }
 
@@ -498,7 +554,9 @@ class BlockPercentageMenu extends AbstractMenu {
                     } else {
                         blocks.put(material, 1.0);
                     }
-                    refresh();
+                    // Save immediately
+                    parentMenu.settings.set(settingKey, blocks);
+                    parentMenu.tool.saveItemSettings(parentMenu.toolItem, parentMenu.settings);
                     setupMenu();
                 })
                 .rightClick(p -> {
@@ -510,7 +568,9 @@ class BlockPercentageMenu extends AbstractMenu {
                             blocks.put(material, newPercentage);
                         }
                     }
-                    refresh();
+                    // Save immediately
+                    parentMenu.settings.set(settingKey, blocks);
+                    parentMenu.tool.saveItemSettings(parentMenu.toolItem, parentMenu.settings);
                     setupMenu();
                 })
                 .shiftLeftClick(p -> {
@@ -519,7 +579,9 @@ class BlockPercentageMenu extends AbstractMenu {
                     } else {
                         blocks.put(material, 10.0);
                     }
-                    refresh();
+                    // Save immediately
+                    parentMenu.settings.set(settingKey, blocks);
+                    parentMenu.tool.saveItemSettings(parentMenu.toolItem, parentMenu.settings);
                     setupMenu();
                 })
                 .shiftRightClick(p -> {
@@ -531,7 +593,9 @@ class BlockPercentageMenu extends AbstractMenu {
                             blocks.put(material, newPercentage);
                         }
                     }
-                    refresh();
+                    // Save immediately
+                    parentMenu.settings.set(settingKey, blocks);
+                    parentMenu.tool.saveItemSettings(parentMenu.toolItem, parentMenu.settings);
                     setupMenu();
                 })
                 .build()
@@ -554,8 +618,10 @@ class BlockPercentageMenu extends AbstractMenu {
         return ButtonBuilder.builder()
                 .itemStack(new ItemStack(Material.GREEN_CONCRETE))
                 .leftClick(p -> {
-                    parentMenu.settings.setMaterialPercentages(settingKey, blocks);
-                    parentMenu.open(player);
+                    parentMenu.settings.set(settingKey, blocks);
+                    parentMenu.tool.saveItemSettings(parentMenu.toolItem, parentMenu.settings);
+                    // Create a fresh parent menu with updated settings
+                    new ToolSettingsMenu(player, parentMenu.tool, parentMenu.toolItem).open(player);
                 })
                 .build()
                 .name("§aSave Configuration")
@@ -573,7 +639,9 @@ class BlockPercentageMenu extends AbstractMenu {
                 .itemStack(new ItemStack(Material.RED_CONCRETE))
                 .leftClick(p -> {
                     blocks.clear();
-                    refresh();
+                    // Save immediately
+                    parentMenu.settings.set(settingKey, blocks);
+                    parentMenu.tool.saveItemSettings(parentMenu.toolItem, parentMenu.settings);
                     setupMenu();
                 })
                 .build()
@@ -584,12 +652,14 @@ class BlockPercentageMenu extends AbstractMenu {
 
     private Button createNormalizeButton() {
         return ButtonBuilder.builder()
-                .itemStack(new ItemStack(Material.REDSTONE_BLOCK))
+                .itemStack(new ItemStack(Material.EMERALD_BLOCK))
                 .leftClick(p -> {
                     if (!blocks.isEmpty()) {
                         double equalPercentage = 100.0 / blocks.size();
                         blocks.replaceAll((material, percentage) -> equalPercentage);
-                        refresh();
+                        // Save immediately
+                        parentMenu.settings.set(settingKey, blocks);
+                        parentMenu.tool.saveItemSettings(parentMenu.toolItem, parentMenu.settings);
                         setupMenu();
                         player.sendMessage("§aPercentages normalized to equal distribution!");
                     }
@@ -605,17 +675,29 @@ class BlockPercentageMenu extends AbstractMenu {
                 .build();
     }
 
+    private Button createBackButton() {
+        return ButtonBuilder.builder()
+                .itemStack(new ItemStack(Material.ARROW))
+                .leftClick(p -> {
+                    // Create a fresh parent menu with updated settings
+                    new ToolSettingsMenu(player, parentMenu.tool, parentMenu.toolItem).open(player);
+                })
+                .build()
+                .name("§eBack")
+                .lore("§7Return to tool settings")
+                .build();
+    }
+
     private Button createPreviousPageButton() {
         return ButtonBuilder.builder()
                 .itemStack(new ItemStack(Material.ARROW))
                 .leftClick(p -> {
                     currentPage--;
-                    refresh();
                     setupMenu();
                 })
                 .build()
                 .name("§ePrevious Page")
-                .lore("§7Page " + currentPage + "/" + (allMaterials.size() / materialsPerPage))
+                .lore("§7Page " + (currentPage + 1) + "/" + (int) Math.ceil((double) allMaterials.size() / materialsPerPage))
                 .build();
     }
 
@@ -624,12 +706,11 @@ class BlockPercentageMenu extends AbstractMenu {
                 .itemStack(new ItemStack(Material.ARROW))
                 .leftClick(p -> {
                     currentPage++;
-                    refresh();
                     setupMenu();
                 })
                 .build()
                 .name("§eNext Page")
-                .lore("§7Page " + (currentPage + 2) + "/" + ((allMaterials.size() / materialsPerPage) + 1))
+                .lore("§7Page " + (currentPage + 1) + "/" + (int) Math.ceil((double) allMaterials.size() / materialsPerPage))
                 .build();
     }
 }

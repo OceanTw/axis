@@ -16,8 +16,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 public abstract class Tool {
@@ -118,6 +117,17 @@ public abstract class Tool {
                             .orElse("");
                     data.set(settingKey, PersistentDataType.STRING, serialized);
                 }
+            } else if (value instanceof Map<?, ?> map) {
+                if (!map.isEmpty() && map.keySet().iterator().next() instanceof Material) {
+                    // Serialize Map<Material, Double>
+                    Map<Material, Double> materialMap = (Map<Material, Double>) map;
+                    StringBuilder serialized = new StringBuilder();
+                    for (Map.Entry<Material, Double> entry : materialMap.entrySet()) {
+                        if (!serialized.isEmpty()) serialized.append(";");
+                        serialized.append(entry.getKey().name()).append(":").append(entry.getValue());
+                    }
+                    data.set(settingKey, PersistentDataType.STRING, serialized.toString());
+                }
             }
         }
     }
@@ -153,10 +163,30 @@ public abstract class Tool {
             } else if (defaultValue instanceof List<?>) {
                 String stored = data.get(settingKey, PersistentDataType.STRING);
                 if (stored != null && !stored.isEmpty()) {
-                    List<Material> materials = List.of(stored.split(",")).stream()
+                    List<Material> materials = Arrays.stream(stored.split(","))
                             .map(Material::valueOf)
                             .toList();
                     settings.set(key, materials);
+                }
+            } else if (defaultValue instanceof Map<?, ?>) {
+                String stored = data.get(settingKey, PersistentDataType.STRING);
+                if (stored != null && !stored.isEmpty()) {
+                    // Deserialize Map<Material, Double>
+                    Map<Material, Double> materialMap = new HashMap<>();
+                    String[] entries = stored.split(";");
+                    for (String entry : entries) {
+                        String[] parts = entry.split(":");
+                        if (parts.length == 2) {
+                            try {
+                                Material material = Material.valueOf(parts[0]);
+                                Double percentage = Double.valueOf(parts[1]);
+                                materialMap.put(material, percentage);
+                            } catch (Exception e) {
+                                // Skip invalid entries
+                            }
+                        }
+                    }
+                    settings.set(key, materialMap);
                 }
             }
         }
