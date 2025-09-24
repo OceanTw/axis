@@ -2,6 +2,7 @@ package dev.ocean.axis.tools.menus;
 
 import dev.ocean.axis.tools.ToolSettings;
 import dev.ocean.axis.utils.ComponentUtils;
+import dev.ocean.axis.utils.PlayerUtils;
 import dev.ocean.axis.utils.menu.MenuUtils;
 import dev.ocean.axis.utils.menu.buttons.Button;
 import dev.ocean.axis.utils.menu.buttons.impl.SimpleButton;
@@ -174,7 +175,7 @@ public class BlockPercentageMenu extends PaginatedMenu {
                         parentMenu.settings.set(settingKey, blocks);
                         parentMenu.tool.saveItemSettings(parentMenu.toolItem, parentMenu.settings);
                         setupMenu();
-                        player.sendMessage(ComponentUtils.colored("Percentages normalized to equal distribution!", NamedTextColor.GREEN));
+                        PlayerUtils.sendInfo(player, "Percentages normalized to equal distribution!");
                     }
                 })
                 .name(ComponentUtils.colored("Normalize Percentages", NamedTextColor.GOLD))
