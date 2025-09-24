@@ -60,6 +60,7 @@ public class ToolListener implements Listener {
 
         ToolService.get().getToolFromItem(mainHandItem).ifPresent(tool -> {
             event.setCancelled(true);
+            if (tool.getConfigurableSettings().isEmpty()) return;
             new ToolSettingsMenu(player, tool, mainHandItem).open(player);
         });
     }
