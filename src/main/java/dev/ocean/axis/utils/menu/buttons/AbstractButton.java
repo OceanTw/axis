@@ -1,23 +1,26 @@
 package dev.ocean.axis.utils.menu.buttons;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 @Getter
 @Setter
+@SuperBuilder
 public abstract class AbstractButton implements Button {
     protected ItemStack itemStack;
-    protected boolean clickable;
+    @Builder.Default
+    protected boolean clickable = true;
     protected Consumer<Player> leftClick;
     protected Consumer<Player> rightClick;
     protected Consumer<Player> shiftLeftClick;
@@ -28,7 +31,8 @@ public abstract class AbstractButton implements Button {
     protected Map<ClickType, Consumer<Player>> customActions;
     protected Component name;
     protected List<Component> lore;
-    protected int amount;
+    @Builder.Default
+    protected int amount = 1;
 
     public AbstractButton(ItemStack itemStack, boolean clickable,
                           Consumer<Player> leftClick,
@@ -51,15 +55,15 @@ public abstract class AbstractButton implements Button {
         this.middleClick = middleClick;
         this.doubleClick = doubleClick;
         this.dropClick = dropClick;
-        this.customActions = customActions != null ? customActions : new HashMap<>();
+        this.customActions = customActions;
         this.name = name;
         this.lore = lore;
         this.amount = amount;
-        applyMeta();
     }
 
     protected void applyMeta() {
         if (itemStack != null) {
+            itemStack.setAmount(amount);
             ItemMeta meta = itemStack.getItemMeta();
             if (meta != null) {
                 if (name != null) meta.displayName(name);
@@ -71,7 +75,8 @@ public abstract class AbstractButton implements Button {
 
     @Override
     public ItemStack getItemStack() {
-        return itemStack.clone();
+        applyMeta();
+        return itemStack != null ? itemStack.clone() : null;
     }
 
     @Override
@@ -83,10 +88,12 @@ public abstract class AbstractButton implements Button {
     public void onClick(Player player, ClickType clickType) {
         if (!clickable) return;
 
-        Consumer<Player> action = customActions.get(clickType);
-        if (action != null) {
-            action.accept(player);
-            return;
+        if (customActions != null) {
+            Consumer<Player> action = customActions.get(clickType);
+            if (action != null) {
+                action.accept(player);
+                return;
+            }
         }
 
         switch (clickType) {

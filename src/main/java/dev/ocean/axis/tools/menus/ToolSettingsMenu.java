@@ -59,32 +59,47 @@ public class ToolSettingsMenu extends AbstractMenu {
     }
 
     private void setupSettingButtons() {
-        int slot = 10;
+        int[] itemSlots = new int[getSize() - 18];
+        int index = 0;
+
+        int rows = getSize() / 9;
+        for (int row = 1; row < rows - 1; row++) {
+            for (int col = 0; col < 9; col++) {
+                itemSlots[index++] = row * 9 + col;
+            }
+        }
+
+        int slotIndex = 0;
         for (String key : tool.getConfigurableSettings()) {
+            if (slotIndex >= itemSlots.length) break;
+
             Object value = settings.get(key, tool.createDefaultSettings().get(key, null));
+            Button button = null;
+
             if (value instanceof Boolean) {
-                setButton(slot, createBooleanSetting(key, (Boolean) value));
+                button = createBooleanSetting(key, (Boolean) value);
             } else if (value instanceof Integer) {
-                setButton(slot, createIntegerSetting(key, (Integer) value));
+                button = createIntegerSetting(key, (Integer) value);
             } else if (value instanceof Double) {
-                setButton(slot, createDoubleSetting(key, (Double) value));
-            } else if (value instanceof List<?> && !((List<?>) value).isEmpty() && ((List<?>) value).get(0) instanceof Material) {
-                setButton(slot, createMaterialListSetting(key, (List<Material>) value));
-            } else if (value instanceof Map<?, ?>) {
-                Map<?, ?> map = (Map<?, ?>) value;
+                button = createDoubleSetting(key, (Double) value);
+            } else if (value instanceof List<?> list && !list.isEmpty() && list.get(0) instanceof Material) {
+                button = createMaterialListSetting(key, (List<Material>) list);
+            } else if (value instanceof Map<?, ?> map) {
                 if (!map.isEmpty() && map.keySet().iterator().next() instanceof Material) {
-                    setButton(slot, createBlockPercentageSetting(key, (Map<Material, Double>) value));
+                    button = createBlockPercentageSetting(key, (Map<Material, Double>) map);
                 } else {
-                    setButton(slot, createMapSetting(key, map));
+                    button = createMapSetting(key, map);
                 }
             } else if (value instanceof String) {
-                setButton(slot, createStringSetting(key, (String) value));
+                button = createStringSetting(key, (String) value);
             }
-            slot++;
-            if (slot % 9 == 8) slot += 2;
-            if (slot >= 44) break;
+
+            if (button != null) {
+                setButton(itemSlots[slotIndex++], button);
+            }
         }
     }
+
 
     private Button createBooleanSetting(String key, Boolean value) {
         Material material = value ? Material.GREEN_CONCRETE : Material.RED_CONCRETE;

@@ -1,7 +1,9 @@
 package dev.ocean.axis.utils.menu.impl;
 
 import dev.ocean.axis.utils.menu.AbstractMenu;
+import dev.ocean.axis.utils.menu.MenuUtils;
 import dev.ocean.axis.utils.menu.buttons.Button;
+import org.bukkit.Material;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +20,7 @@ public class PaginatedMenu extends AbstractMenu {
 
     public PaginatedMenu(String title, int size, List<Button> items) {
         super(title, size);
-        this.items = new ArrayList<>(items);
+        this.items = new ArrayList<>(items != null ? items : new ArrayList<>());
         this.itemSlots = generateItemSlots();
         recalculateMaxPage();
         this.currentPage = 0;
@@ -27,8 +29,8 @@ public class PaginatedMenu extends AbstractMenu {
 
     public PaginatedMenu(String title, int size, List<Button> items, int[] customItemSlots) {
         super(title, size);
-        this.items = new ArrayList<>(items);
-        this.itemSlots = customItemSlots;
+        this.items = new ArrayList<>(items != null ? items : new ArrayList<>());
+        this.itemSlots = customItemSlots != null ? customItemSlots : generateItemSlots();
         recalculateMaxPage();
         this.currentPage = 0;
         setupPage();
@@ -37,13 +39,22 @@ public class PaginatedMenu extends AbstractMenu {
     private int[] generateItemSlots() {
         List<Integer> slots = new ArrayList<>();
         int rows = size / 9;
-        for (int row = 1; row < rows - 1; row++) {
-            for (int col = 1; col < 8; col++) {
-                slots.add(row * 9 + col);
+
+        if (rows <= 2) {
+            for (int i = 0; i < size; i++) {
+                slots.add(i);
+            }
+        } else {
+            for (int row = 1; row < rows - 1; row++) {
+                for (int col = 0; col < 9; col++) {
+                    slots.add(row * 9 + col);
+                }
             }
         }
+
         return slots.stream().mapToInt(Integer::intValue).toArray();
     }
+
 
     private void recalculateMaxPage() {
         this.maxPage = items.isEmpty() ? 0 : (int) Math.ceil((double) items.size() / itemSlots.length) - 1;
@@ -79,13 +90,21 @@ public class PaginatedMenu extends AbstractMenu {
     }
 
     private void setupPage() {
+        if (itemSlots == null || itemSlots.length == 0) {
+            System.err.println("Error: itemSlots is null or empty in PaginatedMenu");
+            return;
+        }
+
         for (int slot : itemSlots) {
             removeButton(slot);
         }
 
         int startIndex = currentPage * itemSlots.length;
         for (int i = 0; i < itemSlots.length && startIndex + i < items.size(); i++) {
-            setButton(itemSlots[i], items.get(startIndex + i));
+            Button button = items.get(startIndex + i);
+            if (button != null) {
+                setButton(itemSlots[i], button);
+            }
         }
 
         if (previousButton != null && previousSlot != -1) {
@@ -103,6 +122,8 @@ public class PaginatedMenu extends AbstractMenu {
                 removeButton(nextSlot);
             }
         }
+
+        fillBorder(MenuUtils.createFillerButton(Material.BLACK_STAINED_GLASS_PANE));
     }
 
     public void addItem(Button button) {

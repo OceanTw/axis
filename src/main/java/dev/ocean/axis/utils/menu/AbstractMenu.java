@@ -28,7 +28,6 @@ public abstract class AbstractMenu implements Menu {
         this.viewers = new HashSet<>();
         this.cancelAllClicks = true;
         this.inventory = Bukkit.createInventory(this, size, title);
-        refresh();
     }
 
     @Override
@@ -37,6 +36,7 @@ public abstract class AbstractMenu implements Menu {
         if (onOpen != null) {
             onOpen.accept(player);
         }
+        refresh();
         player.openInventory(inventory);
     }
 
@@ -132,14 +132,12 @@ public abstract class AbstractMenu implements Menu {
     public void fillBorder(Button button) {
         int rows = size / 9;
         for (int i = 0; i < 9; i++) {
+            if (getButton(i) != null) continue;
             setButton(i, button);
         }
         for (int i = (rows - 1) * 9; i < size; i++) {
+            if (getButton(i) != null) continue;
             setButton(i, button);
-        }
-        for (int i = 1; i < rows - 1; i++) {
-            setButton(i * 9, button);
-            setButton(i * 9 + 8, button);
         }
     }
 

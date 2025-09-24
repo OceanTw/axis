@@ -6,12 +6,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.PlayerInventory;
 
 public class MenuListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getInventory().getHolder() instanceof Menu)) return;
+        if (event.getClickedInventory() == null || event.getClickedInventory() instanceof PlayerInventory) return;
 
         Menu menu = (Menu) event.getInventory().getHolder();
         Player player = (Player) event.getWhoClicked();

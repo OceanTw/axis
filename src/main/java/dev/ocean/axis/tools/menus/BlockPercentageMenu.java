@@ -141,7 +141,7 @@ public class BlockPercentageMenu extends PaginatedMenu {
                         ComponentUtils.colored("Shift Left: +10%", NamedTextColor.YELLOW),
                         ComponentUtils.colored("Shift Right: -10%", NamedTextColor.YELLOW)
                 ))
-                .amount(Math.max(1, Math.min(64, (int) percentage)))
+                .amount(Math.max(1, (int) percentage))
                 .build();
     }
 
