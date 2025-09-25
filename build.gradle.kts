@@ -27,6 +27,7 @@ dependencies {
     implementation("dev.rollczi:litecommands-bukkit:3.10.4")
     compileOnly("com.github.retrooper:packetevents-spigot:2.9.5")
     implementation("me.tofaa.entitylib:spigot:+74871b3-SNAPSHOT")
+    implementation("com.github.luben:zstd-jni:1.5.7-4")
 
     paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
 

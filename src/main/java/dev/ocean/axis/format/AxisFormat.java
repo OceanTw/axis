@@ -9,7 +9,6 @@ import org.bukkit.craftbukkit.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.CraftChunk;
 import org.bukkit.craftbukkit.CraftWorld;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -19,6 +18,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
+import com.github.luben.zstd.ZstdOutputStream;
+import com.github.luben.zstd.ZstdInputStream;
 
 public final class AxisFormat {
 
@@ -51,6 +52,8 @@ public final class AxisFormat {
 
         ServerLevel nmsWorld = ((CraftWorld) world).getHandle();
 
+        Map<String, Integer> paletteMap = new LinkedHashMap<>();
+        List<String> paletteList = new ArrayList<>();
         List<BlockEntry> blocks = new ArrayList<>();
 
         int chunkMinX = minX >> 4;
@@ -91,11 +94,16 @@ public final class AxisFormat {
                                     dataStr = nmsState.toString();
                                 }
 
+                                int paletteIdx = paletteMap.computeIfAbsent(dataStr, s -> {
+                                    paletteList.add(s);
+                                    return paletteList.size() - 1;
+                                });
+
                                 int relX = x - minX;
                                 int relY = y - minY;
                                 int relZ = z - minZ;
 
-                                blocks.add(new BlockEntry((short) relX, (short) relY, (short) relZ, dataStr));
+                                blocks.add(new BlockEntry((short) relX, (short) relY, (short) relZ, paletteIdx));
                             }
                         }
                     }
@@ -106,7 +114,8 @@ public final class AxisFormat {
         File parent = file.getParentFile();
         if (parent != null && !parent.exists()) parent.mkdirs();
 
-        try (DataOutputStream out = new DataOutputStream(new BufferedOutputStream(Files.newOutputStream(file.toPath())))) {
+        try (DataOutputStream out = new DataOutputStream(
+                new BufferedOutputStream(new ZstdOutputStream(Files.newOutputStream(file.toPath()))))) {
             out.writeUTF(world.getName());
             out.writeInt(minX);
             out.writeInt(minY);
@@ -116,12 +125,20 @@ public final class AxisFormat {
             out.writeInt(anchorRelY);
             out.writeInt(anchorRelZ);
 
+            out.writeInt(paletteList.size());
+            for (String s : paletteList) out.writeUTF(s);
+
             out.writeInt(blocks.size());
+            boolean useByte = paletteList.size() <= 256;
             for (BlockEntry entry : blocks) {
                 out.writeShort(entry.relX);
                 out.writeShort(entry.relY);
                 out.writeShort(entry.relZ);
-                out.writeUTF(entry.dataString);
+                if (useByte) {
+                    out.writeByte(entry.paletteIdx);
+                } else {
+                    out.writeShort(entry.paletteIdx);
+                }
             }
         }
     }
@@ -130,7 +147,8 @@ public final class AxisFormat {
         Objects.requireNonNull(file, "File cannot be null");
         Objects.requireNonNull(anchorLocation, "Anchor location cannot be null");
 
-        try (DataInputStream in = new DataInputStream(new BufferedInputStream(Files.newInputStream(file.toPath())))) {
+        try (DataInputStream in = new DataInputStream(
+                new BufferedInputStream(new ZstdInputStream(Files.newInputStream(file.toPath()))))) {
             String worldName = in.readUTF();
             World world = Bukkit.getWorld(worldName);
             if (world == null) throw new IllegalStateException("World " + worldName + " not found!");
@@ -147,28 +165,30 @@ public final class AxisFormat {
             int absOriginY = anchorLocation.getBlockY() - anchorRelY;
             int absOriginZ = anchorLocation.getBlockZ() - anchorRelZ;
 
-            int blockCount = in.readInt();
+            int paletteSize = in.readInt();
+            String[] palette = new String[paletteSize];
+            for (int i = 0; i < paletteSize; i++) palette[i] = in.readUTF();
 
+            boolean useByte = paletteSize <= 256;
+
+            int blockCount = in.readInt();
             Map<Location, BlockData> blocks = new HashMap<>(Math.max(4, blockCount));
-            int parsed = 0, failed = 0;
 
             for (int i = 0; i < blockCount; i++) {
                 short relX = in.readShort();
                 short relY = in.readShort();
                 short relZ = in.readShort();
-                String dataStr = in.readUTF();
+                int paletteIdx = useByte ? in.readUnsignedByte() : in.readUnsignedShort();
 
+                String dataStr = palette[paletteIdx];
                 BlockData data;
                 try {
                     data = Bukkit.createBlockData(dataStr);
-                    parsed++;
                 } catch (IllegalArgumentException ex) {
                     String fallback = dataStr.split("\\[", 2)[0];
                     try {
                         data = Bukkit.createBlockData(fallback);
-                        parsed++;
                     } catch (IllegalArgumentException ex2) {
-                        failed++;
                         data = Bukkit.createBlockData("minecraft:air");
                     }
                 }
@@ -177,30 +197,23 @@ public final class AxisFormat {
                 blocks.put(loc, data);
             }
 
-            Bukkit.getLogger().info("[AxisFormat] Read " + blockCount + " entries (parsed: " + parsed + ", failed: " + failed + ")");
-            Bukkit.getLogger().info("[AxisFormat] originAbs=(" + absOriginX + "," + absOriginY + "," + absOriginZ + "), anchor=(" +
-                    anchorLocation.getBlockX() + "," + anchorLocation.getBlockY() + "," + anchorLocation.getBlockZ() + ")");
-
             if (blocks.isEmpty()) {
-                Bukkit.getLogger().warning("[AxisFormat] No valid blocks to apply from file " + file.getName());
                 return;
             }
 
-            dev.lrxh.blockChanger.BlockChanger.setBlocks(blocks, true).thenRun(() ->
-                    Bukkit.getLogger().info("[AxisFormat] Applied " + blocks.size() + " blocks from " + file.getName())
-            );
+            dev.lrxh.blockChanger.BlockChanger.setBlocks(blocks, true).thenRun(() -> {});
         }
     }
 
     private static class BlockEntry {
         final short relX, relY, relZ;
-        final String dataString;
+        final int paletteIdx;
 
-        BlockEntry(short relX, short relY, short relZ, String dataString) {
+        BlockEntry(short relX, short relY, short relZ, int paletteIdx) {
             this.relX = relX;
             this.relY = relY;
             this.relZ = relZ;
-            this.dataString = dataString;
+            this.paletteIdx = paletteIdx;
         }
     }
 }
