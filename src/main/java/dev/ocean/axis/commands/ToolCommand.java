@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 @Command(name = "tools", aliases = {"toolbox"})
 @Permission("axis.toolbox")
 public class ToolCommand {
-    @Execute(name = "get")
+    @Execute(name = "")
     public void getItem(@Context Player sender, @Arg String item) {
         ToolService.get().getToolByName(item).ifPresentOrElse(tool -> {
             ItemStack is = tool.createItemStack();
