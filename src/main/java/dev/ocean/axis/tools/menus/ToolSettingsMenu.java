@@ -49,11 +49,11 @@ public class ToolSettingsMenu extends AbstractMenu {
         return SimpleButton.builder()
                 .itemStack(tool.getItem())
                 .clickable(false)
-                .name(ComponentUtils.colored(tool.getDisplayName(), NamedTextColor.GOLD))
+                .name(ComponentUtils.colored(tool.getDisplayName(), NamedTextColor.AQUA))
                 .lore(List.of(
                         ComponentUtils.colored("Tool Settings Configuration", NamedTextColor.GRAY),
                         Component.empty(),
-                        ComponentUtils.colored("Modify your tool settings below", NamedTextColor.YELLOW)
+                        ComponentUtils.colored("Modify your tool settings below", NamedTextColor.BLUE)
                 ))
                 .build();
     }
@@ -114,11 +114,11 @@ public class ToolSettingsMenu extends AbstractMenu {
                     tool.saveItemSettings(toolItem, settings);
                     setupMenu();
                 })
-                .name(ComponentUtils.colored(formatKey(key), NamedTextColor.GOLD))
+                .name(ComponentUtils.colored(formatKey(key), NamedTextColor.AQUA))
                 .lore(List.of(
                         ComponentUtils.colored("Current: ", NamedTextColor.GRAY).append(status),
                         Component.empty(),
-                        ComponentUtils.colored("Click to toggle", NamedTextColor.YELLOW)
+                        ComponentUtils.colored("Click to toggle", NamedTextColor.BLUE)
                 ))
                 .build();
     }
@@ -146,14 +146,14 @@ public class ToolSettingsMenu extends AbstractMenu {
                     tool.saveItemSettings(toolItem, settings);
                     setupMenu();
                 })
-                .name(ComponentUtils.colored(formatKey(key), NamedTextColor.GOLD))
+                .name(ComponentUtils.colored(formatKey(key), NamedTextColor.AQUA))
                 .lore(List.of(
                         ComponentUtils.colored("Current: ", NamedTextColor.GRAY).append(ComponentUtils.colored(String.valueOf(value), NamedTextColor.WHITE)),
                         Component.empty(),
-                        ComponentUtils.colored("Left Click: +1", NamedTextColor.YELLOW),
-                        ComponentUtils.colored("Right Click: -1", NamedTextColor.YELLOW),
-                        ComponentUtils.colored("Shift Left: +10", NamedTextColor.YELLOW),
-                        ComponentUtils.colored("Shift Right: -10", NamedTextColor.YELLOW)
+                        ComponentUtils.colored("Left Click: +1", NamedTextColor.BLUE),
+                        ComponentUtils.colored("Right Click: -1", NamedTextColor.BLUE),
+                        ComponentUtils.colored("Shift Left: +10", NamedTextColor.BLUE),
+                        ComponentUtils.colored("Shift Right: -10", NamedTextColor.BLUE)
                 ))
                 .amount(Math.min(64, Math.max(1, value)))
                 .build();
@@ -182,14 +182,14 @@ public class ToolSettingsMenu extends AbstractMenu {
                     tool.saveItemSettings(toolItem, settings);
                     setupMenu();
                 })
-                .name(ComponentUtils.colored(formatKey(key), NamedTextColor.GOLD))
+                .name(ComponentUtils.colored(formatKey(key), NamedTextColor.AQUA))
                 .lore(List.of(
                         ComponentUtils.colored("Current: ", NamedTextColor.GRAY).append(ComponentUtils.colored(String.format("%.1f", value), NamedTextColor.WHITE)),
                         Component.empty(),
-                        ComponentUtils.colored("Left Click: +0.1", NamedTextColor.YELLOW),
-                        ComponentUtils.colored("Right Click: -0.1", NamedTextColor.YELLOW),
-                        ComponentUtils.colored("Shift Left: +1.0", NamedTextColor.YELLOW),
-                        ComponentUtils.colored("Shift Right: -1.0", NamedTextColor.YELLOW)
+                        ComponentUtils.colored("Left Click: +0.1", NamedTextColor.BLUE),
+                        ComponentUtils.colored("Right Click: -0.1", NamedTextColor.BLUE),
+                        ComponentUtils.colored("Shift Left: +1.0", NamedTextColor.BLUE),
+                        ComponentUtils.colored("Shift Right: -1.0", NamedTextColor.BLUE)
                 ))
                 .build();
     }
@@ -200,11 +200,11 @@ public class ToolSettingsMenu extends AbstractMenu {
                 .leftClick(p -> {
                     new MaterialSelectionMenu(p, key, materials, this).open(p);
                 })
-                .name(ComponentUtils.colored(formatKey(key), NamedTextColor.GOLD))
+                .name(ComponentUtils.colored(formatKey(key), NamedTextColor.AQUA))
                 .lore(List.of(
                         ComponentUtils.colored("Materials: ", NamedTextColor.GRAY).append(ComponentUtils.colored(String.valueOf(materials.size()), NamedTextColor.WHITE)),
                         Component.empty(),
-                        ComponentUtils.colored("Click to configure materials", NamedTextColor.YELLOW)
+                        ComponentUtils.colored("Click to configure materials", NamedTextColor.BLUE)
                 ))
                 .build();
     }
@@ -215,11 +215,11 @@ public class ToolSettingsMenu extends AbstractMenu {
                 .leftClick(p -> {
                     new BlockPercentageMenu(p, key, blocks, this).open(p);
                 })
-                .name(ComponentUtils.colored(formatKey(key), NamedTextColor.GOLD))
+                .name(ComponentUtils.colored(formatKey(key), NamedTextColor.AQUA))
                 .lore(List.of(
                         ComponentUtils.colored("Blocks: ", NamedTextColor.GRAY).append(ComponentUtils.colored(String.valueOf(blocks.size()), NamedTextColor.WHITE)),
                         Component.empty(),
-                        ComponentUtils.colored("Click to configure blocks and percentages", NamedTextColor.YELLOW)
+                        ComponentUtils.colored("Click to configure blocks and percentages", NamedTextColor.BLUE)
                 ))
                 .build();
     }
@@ -230,7 +230,7 @@ public class ToolSettingsMenu extends AbstractMenu {
                 .leftClick(p -> {
                     player.sendMessage(ComponentUtils.colored("Map settings are not yet configurable in GUI", NamedTextColor.RED));
                 })
-                .name(ComponentUtils.colored(formatKey(key), NamedTextColor.GOLD))
+                .name(ComponentUtils.colored(formatKey(key), NamedTextColor.AQUA))
                 .lore(List.of(
                         ComponentUtils.colored("Map Size: ", NamedTextColor.GRAY).append(ComponentUtils.colored(String.valueOf(map.size()), NamedTextColor.WHITE)),
                         Component.empty(),
@@ -245,7 +245,7 @@ public class ToolSettingsMenu extends AbstractMenu {
                 .leftClick(p -> {
                     player.sendMessage(ComponentUtils.colored("String settings are not yet configurable in GUI", NamedTextColor.RED));
                 })
-                .name(ComponentUtils.colored(formatKey(key), NamedTextColor.GOLD))
+                .name(ComponentUtils.colored(formatKey(key), NamedTextColor.AQUA))
                 .lore(List.of(
                         ComponentUtils.colored("Value: ", NamedTextColor.GRAY).append(ComponentUtils.colored(value, NamedTextColor.WHITE)),
                         Component.empty(),
@@ -274,7 +274,7 @@ public class ToolSettingsMenu extends AbstractMenu {
                         ComponentUtils.colored("Click to reset all settings", NamedTextColor.GRAY),
                         ComponentUtils.colored("to their default values", NamedTextColor.GRAY),
                         Component.empty(),
-                        ComponentUtils.colored("Click to reset", NamedTextColor.YELLOW)
+                        ComponentUtils.colored("Click to reset", NamedTextColor.BLUE)
                 ))
                 .build();
     }

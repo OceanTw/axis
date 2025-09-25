@@ -29,13 +29,13 @@ public class FillTool extends Tool {
     @Override
     public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
         if (HistoryService.get().getHistory(player).isEmpty()) {
-            PlayerUtils.sendInfo(player, "No actions to undo!");
+            PlayerUtils.sendActionBar(player, "No actions to undo!");
             PlayerUtils.playSoundError(player);
             return true;
         }
 
         HistoryService.get().undo(player).restore(true);
-        PlayerUtils.sendInfo(player, "Undid 1 action");
+        PlayerUtils.sendActionBar(player, "Undid 1 action");
         PlayerUtils.playSoundInfo(player);
         return true;
     }

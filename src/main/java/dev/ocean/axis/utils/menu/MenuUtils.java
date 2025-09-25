@@ -72,7 +72,7 @@ public class MenuUtils {
                 .toggledItem(toggledItem)
                 .toggled(toggled)
                 .clickable(true)
-                .name(ComponentUtils.colored(toggled ? nameToggled : nameDefault, NamedTextColor.YELLOW))
+                .name(ComponentUtils.colored(toggled ? nameToggled : nameDefault, NamedTextColor.BLUE))
                 .onToggle(player -> toggleAction.run())
                 .build();
     }

@@ -84,11 +84,11 @@ public class MaterialSelectionMenu extends PaginatedMenu {
                     }
                     setupMenu();
                 })
-                .name(ComponentUtils.colored(material.name(), NamedTextColor.GOLD))
+                .name(ComponentUtils.colored(material.name(), NamedTextColor.AQUA))
                 .lore(List.of(
                         ComponentUtils.colored("Status: ", NamedTextColor.GRAY).append(status),
                         Component.empty(),
-                        ComponentUtils.colored("Click to toggle", NamedTextColor.YELLOW)
+                        ComponentUtils.colored("Click to toggle", NamedTextColor.BLUE)
                 ))
                 .build();
     }
@@ -105,7 +105,7 @@ public class MaterialSelectionMenu extends PaginatedMenu {
                 .lore(List.of(
                         ComponentUtils.colored("Remove all selected materials", NamedTextColor.GRAY),
                         Component.empty(),
-                        ComponentUtils.colored("Click to clear", NamedTextColor.YELLOW)
+                        ComponentUtils.colored("Click to clear", NamedTextColor.BLUE)
                 ))
                 .build();
     }

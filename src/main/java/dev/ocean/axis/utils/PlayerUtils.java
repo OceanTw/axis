@@ -25,15 +25,15 @@ public class PlayerUtils {
     private static final Duration DEFAULT_FADE_OUT = Duration.ofMillis(1000);
 
     public void sendError(Player player, String message) {
-        player.sendMessage(ComponentUtils.convertLegacy("&c&lERROR &r" + message));
+        player.sendMessage(ComponentUtils.convertLegacy("&c&lᴇʀʀᴏʀ &r" + message));
     }
 
     public void sendWarning(Player player, String message) {
-        player.sendMessage(ComponentUtils.convertLegacy("&e&lWARNING &r" + message));
+        player.sendMessage(ComponentUtils.convertLegacy("&e&lᴡᴀʀɴɪɴɢ &r" + message));
     }
 
     public void sendInfo(Player player, String message) {
-        player.sendMessage(ComponentUtils.convertLegacy("&9&lINFO &r" + message));
+        player.sendMessage(ComponentUtils.convertLegacy("&9&lɪɴꜰᴏ &r" + message));
     }
 
     public void sendMessage(Player player, Component message) {

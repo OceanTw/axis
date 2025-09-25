@@ -186,17 +186,17 @@ public abstract class Tool {
         lore.add(ComponentUtils.colored("✦ " + description, NamedTextColor.GRAY));
         lore.add(Component.empty());
 
-        lore.add(ComponentUtils.colored("⬅ ʟᴇꜰᴛ ᴄʟɪᴄᴋ ", NamedTextColor.YELLOW, false)
+        lore.add(ComponentUtils.colored("⬅ ʟᴇꜰᴛ ᴄʟɪᴄᴋ ", NamedTextColor.BLUE, false)
                 .decorate(TextDecoration.BOLD)
                 .append(ComponentUtils.colored(getLeftClickDescription(), NamedTextColor.WHITE)));
 
-        lore.add(ComponentUtils.colored("➡ ʀɪɢʜᴛ ᴄʟɪᴄᴋ ", NamedTextColor.YELLOW, false)
+        lore.add(ComponentUtils.colored("➡ ʀɪɢʜᴛ ᴄʟɪᴄᴋ ", NamedTextColor.BLUE, false)
                 .decorate(TextDecoration.BOLD)
                 .append(ComponentUtils.colored(getRightClickDescription(), NamedTextColor.WHITE)));
 
         lore.add(Component.empty());
 
-        lore.add(ComponentUtils.colored("⚙ ѕᴡᴀᴘ ᴛᴏ ᴏꜰꜰʜᴀɴᴅ: ", NamedTextColor.GOLD)
+        lore.add(ComponentUtils.colored("⚙ ѕᴡᴀᴘ ᴛᴏ ᴏꜰꜰʜᴀɴᴅ: ", NamedTextColor.AQUA)
                 .decorate(TextDecoration.BOLD)
                 .append(ComponentUtils.colored("ᴏᴘᴇɴ ꜱᴇᴛᴛɪɴɢꜱ ᴍᴇɴᴜ", NamedTextColor.WHITE)));
         return lore;

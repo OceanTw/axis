@@ -131,15 +131,15 @@ public class BlockPercentageMenu extends PaginatedMenu {
                     parentMenu.tool.saveItemSettings(parentMenu.toolItem, parentMenu.settings);
                     setupMenu();
                 })
-                .name(ComponentUtils.colored(material.name(), NamedTextColor.GOLD))
+                .name(ComponentUtils.colored(material.name(), NamedTextColor.AQUA))
                 .lore(List.of(
-                        ComponentUtils.colored("Percentage: ", NamedTextColor.GRAY)
+                        ComponentUtils.colored("ᴘᴇʀᴄᴇɴᴛᴀɢᴇ: ", NamedTextColor.GRAY)
                                 .append(ComponentUtils.colored(String.format("%.1f%%", percentage), NamedTextColor.WHITE)),
                         Component.empty(),
-                        ComponentUtils.colored("Left Click: +1%", NamedTextColor.YELLOW),
-                        ComponentUtils.colored("Right Click: -1%", NamedTextColor.YELLOW),
-                        ComponentUtils.colored("Shift Left: +10%", NamedTextColor.YELLOW),
-                        ComponentUtils.colored("Shift Right: -10%", NamedTextColor.YELLOW)
+                        ComponentUtils.colored("ʟᴇꜰᴛ ᴄʟɪᴄᴋ: +1%", NamedTextColor.BLUE),
+                        ComponentUtils.colored("ʀɪɢʜᴛ ᴄʟɪᴄᴋ: -1%", NamedTextColor.BLUE),
+                        ComponentUtils.colored("ѕʜɪꜰᴛ ʟᴇꜰᴛ ᴄʟɪᴄᴋ: +10%", NamedTextColor.BLUE),
+                        ComponentUtils.colored("ѕʜɪꜰᴛ ʀɪɢʜᴛt ᴄʟɪᴄᴋ: -10%", NamedTextColor.BLUE)
                 ))
                 .amount(Math.max(1, (int) percentage))
                 .build();
@@ -156,9 +156,9 @@ public class BlockPercentageMenu extends PaginatedMenu {
                 })
                 .name(ComponentUtils.colored("Clear All", NamedTextColor.RED))
                 .lore(List.of(
-                        ComponentUtils.colored("Remove all blocks", NamedTextColor.GRAY),
+                        ComponentUtils.colored("ʀᴇᴍᴏᴠᴇ ᴀʟʟ ʙʟᴏᴄᴋѕ", NamedTextColor.GRAY),
                         Component.empty(),
-                        ComponentUtils.colored("Click to clear", NamedTextColor.YELLOW)
+                        ComponentUtils.colored("ᴄʟɪᴄᴋ ᴛᴏ ᴄʟᴇᴀʀ", NamedTextColor.BLUE)
                 ))
                 .build();
     }
@@ -176,12 +176,12 @@ public class BlockPercentageMenu extends PaginatedMenu {
                         PlayerUtils.sendInfo(player, "Percentages normalized to equal distribution!");
                     }
                 })
-                .name(ComponentUtils.colored("Normalize Percentages", NamedTextColor.GOLD))
+                .name(ComponentUtils.colored("Normalize Percentages", NamedTextColor.AQUA))
                 .lore(List.of(
-                        ComponentUtils.colored("Distributes 100% equally", NamedTextColor.GRAY),
-                        ComponentUtils.colored("among all selected blocks", NamedTextColor.GRAY),
+                        ComponentUtils.colored("ᴅɪѕᴛʀɪʙᴜᴛᴇѕ 100% ᴇǫᴜᴀʟʟʏ", NamedTextColor.GRAY),
+                        ComponentUtils.colored("ᴀᴍᴏɴɢ ᴀʟʟ ѕᴇʟᴇᴄᴛᴇᴅ ʙʟᴏᴄᴋѕ", NamedTextColor.GRAY),
                         Component.empty(),
-                        ComponentUtils.colored("Click to normalize", NamedTextColor.YELLOW)
+                        ComponentUtils.colored("ᴄʟɪᴄᴋ ᴛᴏ ɴᴏʀᴍᴀʟɪᴢᴇ", NamedTextColor.BLUE)
                 ))
                 .build();
     }
@@ -192,9 +192,9 @@ public class BlockPercentageMenu extends PaginatedMenu {
                 .leftClick(p -> {
                     new ToolSettingsMenu(player, parentMenu.tool, parentMenu.toolItem).open(player);
                 })
-                .name(ComponentUtils.colored("Back", NamedTextColor.YELLOW))
+                .name(ComponentUtils.colored("Back", NamedTextColor.BLUE))
                 .lore(List.of(
-                        ComponentUtils.colored("Return to tool settings", NamedTextColor.GRAY)
+                        ComponentUtils.colored("ʀᴇᴛᴜʀɴ ᴛᴏ ᴛᴏᴏʟ ѕᴇᴛᴛɪɴɢѕ", NamedTextColor.GRAY)
                 ))
                 .build();
     }

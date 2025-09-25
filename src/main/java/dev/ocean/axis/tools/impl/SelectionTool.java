@@ -22,11 +22,11 @@ public class SelectionTool extends Tool {
     public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
         if (location == null) {
             selection.clear(player.getUniqueId());
-            PlayerUtils.sendInfo(player, "Selection cleared");
+            PlayerUtils.sendActionBar(player, "Selection cleared");
             return true;
         };
         selection.setPos1(player.getUniqueId(), location);
-        PlayerUtils.sendInfo(player, "Position 1 set!");
+        PlayerUtils.sendActionBar(player, "Position &b1 &rset!");
         return true;
     }
 
@@ -36,7 +36,7 @@ public class SelectionTool extends Tool {
             return true;
         }
         selection.setPos2(player.getUniqueId(), location);
-        PlayerUtils.sendInfo(player, "Position 2 set!");
+        PlayerUtils.sendActionBar(player, "Position &b2 set!");
         return true;
     }
 
