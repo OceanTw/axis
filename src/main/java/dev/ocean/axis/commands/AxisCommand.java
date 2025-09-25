@@ -55,7 +55,7 @@ public class AxisCommand {
         }
         try {
             AxisFormat.load(file, sender.getLocation());
-            PlayerUtils.sendInfo(sender, "Loaded " + name + ".axis (anchored to your saved relative spot)");
+            PlayerUtils.sendInfo(sender, "Loaded " + name + ".axis");
         } catch (Exception e) {
             e.printStackTrace();
             PlayerUtils.sendError(sender, "Failed to load schematic! Check console for more information.");

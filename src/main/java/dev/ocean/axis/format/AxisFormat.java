@@ -114,6 +114,7 @@ public final class AxisFormat {
         File parent = file.getParentFile();
         if (parent != null && !parent.exists()) parent.mkdirs();
 
+        // TODO: Make configuration for compression level
         try (DataOutputStream out = new DataOutputStream(
                 new BufferedOutputStream(new ZstdOutputStream(Files.newOutputStream(file.toPath()))))) {
             out.writeUTF(world.getName());
