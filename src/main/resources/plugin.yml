@@ -2,4 +2,3 @@ name: axis
 version: 1.0
 main: dev.ocean.axis.AxisPlugin
 api-version: 1.21
-depend: [packetevents]

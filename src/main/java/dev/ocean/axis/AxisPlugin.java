@@ -26,16 +26,16 @@ public class AxisPlugin extends JavaPlugin {
     public void onEnable() {
         instance = this;
         BlockChanger.initialize(this);
-        PacketEvents.getAPI().init();
-        APIConfig settings;
-        SpigotEntityLibPlatform platform = new SpigotEntityLibPlatform(this);
+//        PacketEvents.getAPI().init();
+//        APIConfig settings;
+//        SpigotEntityLibPlatform platform = new SpigotEntityLibPlatform(this);
 
-        settings = new APIConfig(PacketEvents.getAPI())
-                .debugMode()
-                .tickTickables()
-                .usePlatformLogger();
+//        settings = new APIConfig(PacketEvents.getAPI())
+//                .debugMode()
+//                .tickTickables()
+//                .usePlatformLogger();
 
-        EntityLib.init(platform, settings);
+//        EntityLib.init(platform, settings);
         getServer().getPluginManager().registerEvents(new ToolListener(), this);
         getServer().getPluginManager().registerEvents(new MenuListener(), this);
 

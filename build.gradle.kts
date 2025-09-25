@@ -15,9 +15,9 @@ repositories {
     maven("https://oss.sonatype.org/content/groups/public/")
     maven("https://repo.panda-lang.org/releases")
     maven("https://jitpack.io")
-    maven("https://repo.codemc.io/repository/maven-releases/")
-    maven("https://repo.codemc.io/repository/maven-snapshots/")
-    maven("https://maven.evokegames.gg/snapshots")
+//    maven("https://repo.codemc.io/repository/maven-releases/")
+//    maven("https://repo.codemc.io/repository/maven-snapshots/")
+//    maven("https://maven.evokegames.gg/snapshots")
 }
 
 dependencies {
@@ -25,8 +25,8 @@ dependencies {
     implementation("com.github.Devlrxxh:BlockChanger:23397d3")
     implementation("org.reflections:reflections:0.10.2")
     implementation("dev.rollczi:litecommands-bukkit:3.10.4")
-    compileOnly("com.github.retrooper:packetevents-spigot:2.9.5")
-    implementation("me.tofaa.entitylib:spigot:+74871b3-SNAPSHOT")
+//    compileOnly("com.github.retrooper:packetevents-spigot:2.9.5")
+//    implementation("me.tofaa.entitylib:spigot:+74871b3-SNAPSHOT")
     implementation("com.github.luben:zstd-jni:1.5.7-4")
 
     paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
