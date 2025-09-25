@@ -9,7 +9,7 @@ For more information, join our [Discord](https://discord.gg/f6rUtpy6y4)
 ## Features ✨
 
 - ⚡ **Fast Editing**: Handles big edits easily and quickly.
-- 📦 **.axis Format**: Save and share with a custom file format, similar to WorldEdit schematics.
+- 📦 **Axis Format**: Save and share with a custom file format, similar to .schematic files.
 - 🧼 **Simple UI**: No clutter—just the tools you need.
 - 🛠️ **Editing Tools**: Includes Selection Tool, Fill Tool, Sphere Tool, and more.
 - 🖱️ **Tool Settings**: Each tool has settings you can change in the UI.
