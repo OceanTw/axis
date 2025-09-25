@@ -14,6 +14,9 @@ public class ComponentUtils {
     private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacyAmpersand();
     private static final MiniMessage MINI = MiniMessage.miniMessage();
 
+    private static final char[] NORMAL = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+    private static final char[] SMALL =  "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀѕᴛᴜᴠᴡxʏᴢ".toCharArray();
+
     public Component convertLegacy(String input) {
         Component legacyComponent = LEGACY.deserialize(input);
         String miniMsg = MINI.serialize(legacyComponent);
@@ -38,5 +41,29 @@ public class ComponentUtils {
 
     public Component legacy(String legacy) {
         return LEGACY.deserialize(legacy).decoration(TextDecoration.ITALIC, false);
+    }
+
+    private static String toSmallText(String input) {
+        StringBuilder sb = new StringBuilder();
+        for (char c : input.toCharArray()) {
+            char lower = Character.toLowerCase(c);
+            int index = -1;
+            for (int i = 0; i < NORMAL.length; i++) {
+                if (NORMAL[i] == lower) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index != -1) {
+                sb.append(SMALL[index]);
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    public static Component smallText(String text) {
+        return Component.text(toSmallText(text));
     }
 }

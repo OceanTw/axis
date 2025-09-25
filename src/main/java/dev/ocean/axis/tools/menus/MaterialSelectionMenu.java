@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import static dev.ocean.axis.utils.ComponentUtils.smallText;
+
 public class MaterialSelectionMenu extends PaginatedMenu {
 
     private final Player player;
@@ -71,8 +73,8 @@ public class MaterialSelectionMenu extends PaginatedMenu {
             return null;
         }
         Component status = selected
-                ? ComponentUtils.colored("Selected", NamedTextColor.GREEN)
-                : ComponentUtils.colored("Not Selected", NamedTextColor.GRAY);
+                ? smallText("Selected").color(NamedTextColor.GREEN)
+                : smallText("Not Selected").color(NamedTextColor.RED);
 
         return SimpleButton.builder()
                 .itemStack(item)
@@ -86,9 +88,9 @@ public class MaterialSelectionMenu extends PaginatedMenu {
                 })
                 .name(ComponentUtils.colored(material.name(), NamedTextColor.AQUA))
                 .lore(List.of(
-                        ComponentUtils.colored("Status: ", NamedTextColor.GRAY).append(status),
+                        smallText("Status: ").color(NamedTextColor.GRAY).append(status),
                         Component.empty(),
-                        ComponentUtils.colored("Click to toggle", NamedTextColor.BLUE)
+                        smallText("Click to toggle").color(NamedTextColor.BLUE)
                 ))
                 .build();
     }
@@ -101,11 +103,11 @@ public class MaterialSelectionMenu extends PaginatedMenu {
                     refresh();
                     setupMenu();
                 })
-                .name(ComponentUtils.colored("Clear All", NamedTextColor.RED))
+                .name(smallText("Clear All").color(NamedTextColor.RED))
                 .lore(List.of(
-                        ComponentUtils.colored("Remove all selected materials", NamedTextColor.GRAY),
+                        smallText("Remove all selected materials").color(NamedTextColor.GRAY),
                         Component.empty(),
-                        ComponentUtils.colored("Click to clear", NamedTextColor.BLUE)
+                        smallText("Click to clear").color(NamedTextColor.BLUE)
                 ))
                 .build();
     }

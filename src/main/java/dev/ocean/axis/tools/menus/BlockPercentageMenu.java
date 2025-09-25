@@ -1,6 +1,7 @@
 package dev.ocean.axis.tools.menus;
 
 import dev.ocean.axis.utils.ComponentUtils;
+import static dev.ocean.axis.utils.ComponentUtils.smallText;
 import dev.ocean.axis.utils.PlayerUtils;
 import dev.ocean.axis.utils.menu.MenuUtils;
 import dev.ocean.axis.utils.menu.buttons.Button;
@@ -131,15 +132,15 @@ public class BlockPercentageMenu extends PaginatedMenu {
                     parentMenu.tool.saveItemSettings(parentMenu.toolItem, parentMenu.settings);
                     setupMenu();
                 })
-                .name(ComponentUtils.colored(material.name(), NamedTextColor.AQUA))
+                .name(smallText(material.name()).color(NamedTextColor.AQUA))
                 .lore(List.of(
-                        ComponentUtils.colored("ᴘᴇʀᴄᴇɴᴛᴀɢᴇ: ", NamedTextColor.GRAY)
-                                .append(ComponentUtils.colored(String.format("%.1f%%", percentage), NamedTextColor.WHITE)),
+                        smallText("Percentage: ").color(NamedTextColor.GRAY)
+                                .append(smallText(String.format("%.1f%%", percentage)).color(NamedTextColor.WHITE)),
                         Component.empty(),
-                        ComponentUtils.colored("ʟᴇꜰᴛ ᴄʟɪᴄᴋ: +1%", NamedTextColor.BLUE),
-                        ComponentUtils.colored("ʀɪɢʜᴛ ᴄʟɪᴄᴋ: -1%", NamedTextColor.BLUE),
-                        ComponentUtils.colored("ѕʜɪꜰᴛ ʟᴇꜰᴛ ᴄʟɪᴄᴋ: +10%", NamedTextColor.BLUE),
-                        ComponentUtils.colored("ѕʜɪꜰᴛ ʀɪɢʜᴛt ᴄʟɪᴄᴋ: -10%", NamedTextColor.BLUE)
+                        smallText("Left Click: +1%").color(NamedTextColor.BLUE),
+                        smallText("Right Click: -1%").color(NamedTextColor.BLUE),
+                        smallText("Shift Left Click: +10%").color(NamedTextColor.BLUE),
+                        smallText("Shift Right Click: -10%").color(NamedTextColor.BLUE)
                 ))
                 .amount(Math.max(1, (int) percentage))
                 .build();
@@ -154,11 +155,11 @@ public class BlockPercentageMenu extends PaginatedMenu {
                     parentMenu.tool.saveItemSettings(parentMenu.toolItem, parentMenu.settings);
                     setupMenu();
                 })
-                .name(ComponentUtils.colored("Clear All", NamedTextColor.RED))
+                .name(smallText("Clear All").color(NamedTextColor.RED))
                 .lore(List.of(
-                        ComponentUtils.colored("ʀᴇᴍᴏᴠᴇ ᴀʟʟ ʙʟᴏᴄᴋѕ", NamedTextColor.GRAY),
+                        smallText("Remove all blocks").color(NamedTextColor.GRAY),
                         Component.empty(),
-                        ComponentUtils.colored("ᴄʟɪᴄᴋ ᴛᴏ ᴄʟᴇᴀʀ", NamedTextColor.BLUE)
+                        smallText("Click to clear").color(NamedTextColor.BLUE)
                 ))
                 .build();
     }
@@ -176,12 +177,12 @@ public class BlockPercentageMenu extends PaginatedMenu {
                         PlayerUtils.sendInfo(player, "Percentages normalized to equal distribution!");
                     }
                 })
-                .name(ComponentUtils.colored("Normalize Percentages", NamedTextColor.AQUA))
+                .name(smallText("Normalize Percentages").color(NamedTextColor.AQUA))
                 .lore(List.of(
-                        ComponentUtils.colored("ᴅɪѕᴛʀɪʙᴜᴛᴇѕ 100% ᴇǫᴜᴀʟʟʏ", NamedTextColor.GRAY),
-                        ComponentUtils.colored("ᴀᴍᴏɴɢ ᴀʟʟ ѕᴇʟᴇᴄᴛᴇᴅ ʙʟᴏᴄᴋѕ", NamedTextColor.GRAY),
+                        smallText("Distributes 100% equally").color(NamedTextColor.GRAY),
+                        smallText("among all selected blocks").color(NamedTextColor.GRAY),
                         Component.empty(),
-                        ComponentUtils.colored("ᴄʟɪᴄᴋ ᴛᴏ ɴᴏʀᴍᴀʟɪᴢᴇ", NamedTextColor.BLUE)
+                        smallText("Click to normalize").color(NamedTextColor.BLUE)
                 ))
                 .build();
     }
@@ -192,9 +193,9 @@ public class BlockPercentageMenu extends PaginatedMenu {
                 .leftClick(p -> {
                     new ToolSettingsMenu(player, parentMenu.tool, parentMenu.toolItem).open(player);
                 })
-                .name(ComponentUtils.colored("Back", NamedTextColor.BLUE))
+                .name(smallText("Back").color(NamedTextColor.BLUE))
                 .lore(List.of(
-                        ComponentUtils.colored("ʀᴇᴛᴜʀɴ ᴛᴏ ᴛᴏᴏʟ ѕᴇᴛᴛɪɴɢѕ", NamedTextColor.GRAY)
+                        smallText("Return to tool settings").color(NamedTextColor.GRAY)
                 ))
                 .build();
     }
