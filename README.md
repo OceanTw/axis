@@ -3,8 +3,8 @@
 Axis is a modern world editing tool that's fast, simple, and easy to use. It uses a clean, minimal interface to make editing worlds quick and straightforward.
 
 ## NOTE
-This plugin is still in early development, Pull Requests are welcome,
-for more information, join our [DIscord](f6rUtpy6y4)
+This plugin is still in early development, Pull Requests are welcome.
+for more information, join our [Discord](https://discord.ggf6rUtpy6y4)
 
 ## Features ✨
 
