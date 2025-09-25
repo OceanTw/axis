@@ -123,7 +123,7 @@ public class PaginatedMenu extends AbstractMenu {
             }
         }
 
-        fillBorder(MenuUtils.createFillerButton(Material.BLACK_STAINED_GLASS_PANE));
+        fillBorder(MenuUtils.createFillerButton(Material.BLUE_STAINED_GLASS_PANE));
     }
 
     public void addItem(Button button) {

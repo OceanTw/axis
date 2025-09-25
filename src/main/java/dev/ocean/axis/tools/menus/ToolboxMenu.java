@@ -9,15 +9,15 @@ import dev.ocean.axis.utils.menu.buttons.Button;
 import dev.ocean.axis.utils.menu.buttons.impl.SimpleButton;
 import dev.ocean.axis.utils.menu.impl.PaginatedMenu;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static dev.ocean.axis.utils.ComponentUtils.smallText;
 
 public class ToolboxMenu extends PaginatedMenu {
 
@@ -54,7 +54,8 @@ public class ToolboxMenu extends PaginatedMenu {
 
         List<Component> displayLore = displayItem.lore();
 
-        displayLore.add(ComponentUtils.smallText("&9Click to receive this tool"));
+        displayLore.add(Component.empty());
+        displayLore.add(smallText("&9&lClick to get!"));
 
         return SimpleButton.builder()
                 .itemStack(displayItem)

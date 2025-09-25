@@ -54,7 +54,7 @@ public class MaterialSelectionMenu extends PaginatedMenu {
         }
         setItems(materialButtons);
 
-        fillBorder(MenuUtils.createFillerButton(Material.BLACK_STAINED_GLASS_PANE));
+        fillBorder(MenuUtils.createFillerButton(Material.BLUE_STAINED_GLASS_PANE));
         setButton(45, MenuUtils.createBackButton(parentMenu));
         setButton(53, createClearAllButton());
         setPaginationButtons(

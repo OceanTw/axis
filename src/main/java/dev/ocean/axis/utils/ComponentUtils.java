@@ -2,6 +2,7 @@ package dev.ocean.axis.utils;
 
 import lombok.experimental.UtilityClass;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -16,21 +17,21 @@ public class ComponentUtils {
     private static final char[] NORMAL = "abcdefghijklmnopqrstuvwxyz".toCharArray();
     private static final char[] SMALL =  "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀѕᴛᴜᴠᴡxʏᴢ".toCharArray();
 
-    public Component convertLegacy(String input) {
+    public TextComponent convertLegacy(String input) {
         Component legacyComponent = LEGACY.deserialize(input);
         String miniMsg = MINI.serialize(legacyComponent);
-        return MINI.deserialize(miniMsg).decoration(TextDecoration.ITALIC, false);
+        return (TextComponent) MINI.deserialize(miniMsg).decoration(TextDecoration.ITALIC, false);
     }
 
-    public Component colored(String text, NamedTextColor color) {
+    public TextComponent colored(String text, NamedTextColor color) {
         return Component.text(text).color(color).decoration(TextDecoration.ITALIC, false);
     }
 
-    public Component colored(String text, NamedTextColor color, boolean italic) {
+    public TextComponent colored(String text, NamedTextColor color, boolean italic) {
         return Component.text(text).color(color).decoration(TextDecoration.ITALIC, italic);
     }
 
-    public Component plain(String text) {
+    public TextComponent plain(String text) {
         return Component.text(text).decoration(TextDecoration.ITALIC, false);
     }
 
@@ -42,27 +43,37 @@ public class ComponentUtils {
         return LEGACY.deserialize(legacy).decoration(TextDecoration.ITALIC, false);
     }
 
-    private static String toSmallText(String input) {
+    public static String toSmallText(String input) {
         StringBuilder sb = new StringBuilder();
-        for (char c : input.toCharArray()) {
-            char lower = Character.toLowerCase(c);
-            int index = -1;
-            for (int i = 0; i < NORMAL.length; i++) {
-                if (NORMAL[i] == lower) {
-                    index = i;
-                    break;
-                }
-            }
-            if (index != -1) {
-                sb.append(SMALL[index]);
-            } else {
+        int i = 0;
+        while (i < input.length()) {
+            char c = input.charAt(i);
+            if (c == '&' && i + 1 < input.length()) {
                 sb.append(c);
+                sb.append(input.charAt(i + 1));
+                i += 2;
+            } else {
+                char lower = Character.toLowerCase(c);
+                int index = -1;
+                for (int j = 0; j < NORMAL.length; j++) {
+                    if (NORMAL[j] == lower) {
+                        index = j;
+                        break;
+                    }
+                }
+                if (index != -1) {
+                    sb.append(SMALL[index]);
+                } else {
+                    sb.append(c);
+                }
+                i++;
             }
         }
         return sb.toString();
     }
 
-    public static Component smallText(String text) {
-        return Component.text(toSmallText(text));
+    public static TextComponent smallText(String text) {
+        String smallLegacy = toSmallText(text);
+        return LEGACY.deserialize(smallLegacy).decoration(TextDecoration.ITALIC, false);
     }
 }

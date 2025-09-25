@@ -44,6 +44,6 @@ public class AxisPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-
+        this.liteCommands.unregister();
     }
 }

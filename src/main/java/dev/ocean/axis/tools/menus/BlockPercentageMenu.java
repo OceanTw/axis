@@ -64,7 +64,7 @@ public class BlockPercentageMenu extends PaginatedMenu {
         }
         setItems(materialButtons);
 
-        fillBorder(MenuUtils.createFillerButton(Material.BLACK_STAINED_GLASS_PANE));
+        fillBorder(MenuUtils.createFillerButton(Material.BLUE_STAINED_GLASS_PANE));
         setButton(45, createBackButton());
         setButton(53, createClearAllButton());
         setButton(49, createNormalizeButton());

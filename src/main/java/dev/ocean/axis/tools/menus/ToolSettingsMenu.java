@@ -39,7 +39,7 @@ public class ToolSettingsMenu extends AbstractMenu {
     }
 
     private void setupMenu() {
-        fillBorder(MenuUtils.createFillerButton(Material.BLACK_STAINED_GLASS_PANE));
+        fillBorder(MenuUtils.createFillerButton(Material.BLUE_STAINED_GLASS_PANE));
         setButton(49, MenuUtils.createCloseButton());
         setButton(4, createToolInfoButton());
         setupSettingButtons();

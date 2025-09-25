@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -183,22 +182,12 @@ public abstract class Tool {
 
     protected List<Component> createItemLore() {
         List<Component> lore = new ArrayList<>();
-        lore.add(ComponentUtils.colored("✦ " + description, NamedTextColor.GRAY));
+        lore.add(ComponentUtils.smallText("&7✦ " + description));
         lore.add(Component.empty());
 
-        lore.add(ComponentUtils.colored("⬅ ʟᴇꜰᴛ ᴄʟɪᴄᴋ ", NamedTextColor.BLUE, false)
-                .decorate(TextDecoration.BOLD)
-                .append(ComponentUtils.colored(getLeftClickDescription(), NamedTextColor.WHITE)));
-
-        lore.add(ComponentUtils.colored("➡ ʀɪɢʜᴛ ᴄʟɪᴄᴋ ", NamedTextColor.BLUE, false)
-                .decorate(TextDecoration.BOLD)
-                .append(ComponentUtils.colored(getRightClickDescription(), NamedTextColor.WHITE)));
-
-        lore.add(Component.empty());
-
-        lore.add(ComponentUtils.colored("⚙ ѕᴡᴀᴘ ᴛᴏ ᴏꜰꜰʜᴀɴᴅ: ", NamedTextColor.AQUA)
-                .decorate(TextDecoration.BOLD)
-                .append(ComponentUtils.colored("ᴏᴘᴇɴ ꜱᴇᴛᴛɪɴɢꜱ ᴍᴇɴᴜ", NamedTextColor.WHITE)));
+        lore.add(ComponentUtils.smallText("&b⬅ LEFT CLICK ").append(ComponentUtils.smallText("&f" + getLeftClickDescription())));
+        lore.add(ComponentUtils.smallText("&b➡ RIGHT CLICK ").append(ComponentUtils.smallText("&f" + getRightClickDescription())));
+        lore.add(ComponentUtils.smallText("&b⚙ SWAP TO OFFHAND ").append(ComponentUtils.smallText("&fᴏᴘᴇɴ ꜱᴇᴛᴛɪɴɢꜱ ᴍᴇɴᴜ")));
         return lore;
     }
 
@@ -215,6 +204,6 @@ public abstract class Tool {
     }
 
     public Component getDescriptionComponent() {
-        return ComponentUtils.colored(description, NamedTextColor.GRAY);
+        return ComponentUtils.smallText("&7" + description);
     }
 }
