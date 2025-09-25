@@ -4,7 +4,7 @@ Axis is a modern world editing tool that's fast, simple, and easy to use. It use
 
 ## NOTE
 This plugin is still in early development, Pull Requests are welcome.
-for more information, join our [Discord](https://discord.gg/f6rUtpy6y4)
+For more information, join our [Discord](https://discord.gg/f6rUtpy6y4)
 
 ## Features ✨
 
@@ -26,12 +26,18 @@ for more information, join our [Discord](https://discord.gg/f6rUtpy6y4)
 Soon
 
 ## API 🛠️
-
 Soon
 
 ## Screenshots 🖼️
 
-Soon
+![Toolbox Demo](assets/demo_toolbox.png)
+*Minimal and clean toolbox UI.*
+
+![Item Browser Demo](assets/demo_itembrowser.png)
+*Browse and select items with ease.*
+
+![Item Settings Demo](assets/demo_toolsettings.png)
+*Edit tool settings directly from the item interface.*
 
 ---
 
