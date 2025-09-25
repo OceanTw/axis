@@ -50,11 +50,7 @@ public class SphereTool extends Tool {
         boolean hollow = settings.get("hollow", false);
         int radius = settings.get("radius", 5);
 
-        if (radius < 1 || radius > 50) {
-            PlayerUtils.sendError(player, "Invalid radius! Must be between 1 and 50.");
-            PlayerUtils.playSoundError(player);
-            return false;
-        }
+        center = PlayerUtils.raycast(player, settings.get("distance", 8), false).getLocation();
 
         Map<Location, BlockData> blocks = new HashMap<>();
         int radiusSquared = radius * radius;
