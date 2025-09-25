@@ -8,6 +8,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
@@ -18,23 +19,30 @@ import java.util.Optional;
 
 @UtilityClass
 public class PlayerUtils {
-    private static final double DEFAULT_MAX_DISTANCE = 100.0;
+    private static final double DEFAULT_MAX_DISTANCE = 160.0;
     private static final double EPSILON = 1e-6;
 
     private static final Duration DEFAULT_FADE_IN = Duration.ofMillis(500);
     private static final Duration DEFAULT_STAY = Duration.ofMillis(3500);
     private static final Duration DEFAULT_FADE_OUT = Duration.ofMillis(1000);
 
-    public Block raycast(Player player, double distance, boolean stopAtHit) {
+    public RaycastResult raycast(Player player, double distance, boolean stopAtHit) {
+        if (distance <= 0) {
+            distance = DEFAULT_MAX_DISTANCE;
+        }
         RayTraceResult result = player.rayTraceBlocks(distance, FluidCollisionMode.NEVER);
 
         if (result != null && result.getHitBlock() != null) {
-            return result.getHitBlock();
+            Block block = result.getHitBlock();
+            BlockFace face = result.getHitBlockFace();
+            Location hitLoc = result.getHitPosition() != null ? result.getHitPosition().toLocation(player.getWorld()) : block.getLocation();
+            return new RaycastResult(block, face, hitLoc);
         } else {
             Location eye = player.getEyeLocation();
             Vector dir = eye.getDirection().normalize();
             Location lastLoc = eye.clone().add(dir.multiply(distance));
-            return player.getWorld().getBlockAt(lastLoc);
+            Block block = player.getWorld().getBlockAt(lastLoc);
+            return new RaycastResult(block, null, lastLoc);
         }
     }
 

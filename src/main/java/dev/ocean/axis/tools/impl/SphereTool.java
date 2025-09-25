@@ -50,7 +50,11 @@ public class SphereTool extends Tool {
         boolean hollow = settings.get("hollow", false);
         int radius = settings.get("radius", 5);
 
-        center = PlayerUtils.raycast(player, settings.get("distance", 8), false).getLocation();
+        if (settings.get("brush_mode", false)) {
+            center = PlayerUtils.raycast(player, 160, true).getLocation();
+        } else {
+            center = PlayerUtils.raycast(player, settings.get("distance", 8), false).getLocation();
+        }
 
         Map<Location, BlockData> blocks = new HashMap<>();
         int radiusSquared = radius * radius;
@@ -131,6 +135,7 @@ public class SphereTool extends Tool {
         settings.set("distance", 8);
         settings.set("hollow", false);
         settings.set("replace_air_only", false);
+        settings.set("brush_mode", true);
 
         Map<Material, Double> defaultBlocks = new HashMap<>();
         defaultBlocks.put(Material.STONE, 100.0);
@@ -141,7 +146,7 @@ public class SphereTool extends Tool {
 
     @Override
     public Set<String> getConfigurableSettings() {
-        return Set.of("blocks", "replace_air_only", "hollow", "radius", "distance");
+        return Set.of("blocks", "replace_air_only", "hollow", "radius", "distance", "brush_mode");
     }
 
     @Override
