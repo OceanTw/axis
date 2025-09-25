@@ -4,7 +4,7 @@ Axis is a modern world editing tool that's fast, simple, and easy to use. It use
 
 ## NOTE
 This plugin is still in early development, Pull Requests are welcome.
-for more information, join our [Discord](https://discord.ggf6rUtpy6y4)
+for more information, join our [Discord](https://discord.gg/f6rUtpy6y4)
 
 ## Features ✨
 
@@ -37,4 +37,4 @@ Soon
 
 ## Contact 📬
 
-For questions or support, reach out in our [Discord](https://github.com/OceanTw).
+For questions or support, reach out in our [Discord](https://discord.gg/f6rUtpy6y4).
