@@ -2,7 +2,6 @@ package dev.ocean.axis.tools.menus;
 
 import dev.ocean.axis.tools.Tool;
 import dev.ocean.axis.tools.ToolSettings;
-import dev.ocean.axis.utils.ComponentUtils;
 import dev.ocean.axis.utils.menu.AbstractMenu;
 import dev.ocean.axis.utils.menu.MenuUtils;
 import dev.ocean.axis.utils.menu.buttons.Button;

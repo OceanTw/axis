@@ -1,7 +1,5 @@
 package dev.ocean.axis.tools.menus;
 
-import dev.ocean.axis.utils.ComponentUtils;
-import static dev.ocean.axis.utils.ComponentUtils.smallText;
 import dev.ocean.axis.utils.PlayerUtils;
 import dev.ocean.axis.utils.menu.MenuUtils;
 import dev.ocean.axis.utils.menu.buttons.Button;
@@ -14,6 +12,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
+
+import static dev.ocean.axis.utils.ComponentUtils.smallText;
 
 public class BlockPercentageMenu extends PaginatedMenu {
 
