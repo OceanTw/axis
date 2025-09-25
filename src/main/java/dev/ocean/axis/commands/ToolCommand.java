@@ -23,6 +23,7 @@ public class ToolCommand {
                 sender.getInventory().addItem(is);
                 PlayerUtils.sendInfo(sender, "Item added to inventory: " + item);
             }, () -> PlayerUtils.sendError(sender, "Item not found"));
+            return;
         }
         new ToolboxMenu().open(sender);
     }
