@@ -60,7 +60,7 @@ public abstract class Tool {
     }
 
     public ItemStack getItem() {
-        return createItemStack();
+        return new ItemStack(icon);
     }
 
     public boolean matches(ItemStack item) {
