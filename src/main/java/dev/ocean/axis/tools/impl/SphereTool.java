@@ -141,7 +141,7 @@ public class SphereTool extends Tool {
 
     @Override
     public Set<String> getConfigurableSettings() {
-        return Set.of("blocks", "replace_air_only", "hollow", "radius");
+        return Set.of("blocks", "replace_air_only", "hollow", "radius", "distance");
     }
 
     @Override
