@@ -3,7 +3,6 @@ package dev.ocean.axis.commands;
 import dev.ocean.axis.tools.ToolService;
 import dev.ocean.axis.tools.menus.ToolboxMenu;
 import dev.ocean.axis.utils.PlayerUtils;
-import dev.rollczi.litecommands.annotations.argument.Arg;
 import dev.rollczi.litecommands.annotations.command.Command;
 import dev.rollczi.litecommands.annotations.context.Context;
 import dev.rollczi.litecommands.annotations.execute.Execute;

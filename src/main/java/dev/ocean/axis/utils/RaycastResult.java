@@ -1,9 +1,9 @@
 package dev.ocean.axis.utils;
 
 import lombok.Getter;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.Location;
 
 public class RaycastResult {
     @Getter
