@@ -36,7 +36,7 @@ public class SelectionTool extends Tool {
             return true;
         }
         selection.setPos2(player.getUniqueId(), location);
-        PlayerUtils.sendActionBar(player, "Position &b2 set!");
+        PlayerUtils.sendActionBar(player, "Position &b2 &rset!");
         return true;
     }
 

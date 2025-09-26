@@ -43,17 +43,17 @@ public class AxisFormat {
 
         Map<String, Integer> paletteMap = new LinkedHashMap<>();
         List<String> paletteList = new ArrayList<>();
-        List<BlockEntry> blocks = new ArrayList<>();
 
         Map<Location, BlockData> regionBlocks = WorldUtils.getBlocksAsync(
                 new Location(world, minX, minY, minZ),
                 new Location(world, maxX, maxY, maxZ)
         ).join();
 
+        List<BlockEntry> rawBlocks = new ArrayList<>();
         for (Map.Entry<Location, BlockData> entry : regionBlocks.entrySet()) {
             Location loc = entry.getKey();
             BlockData data = entry.getValue();
-            String dataStr = data.getAsString();
+            String dataStr = compressBlockData(data.getAsString());
             int paletteIdx = paletteMap.computeIfAbsent(dataStr, s -> {
                 paletteList.add(s);
                 return paletteList.size() - 1;
@@ -61,34 +61,41 @@ public class AxisFormat {
             int relX = loc.getBlockX() - minX;
             int relY = loc.getBlockY() - minY;
             int relZ = loc.getBlockZ() - minZ;
-            blocks.add(new BlockEntry((short) relX, (short) relY, (short) relZ, paletteIdx));
+            rawBlocks.add(new BlockEntry((short) relX, (short) relY, (short) relZ, paletteIdx));
         }
+
+        rawBlocks.sort(Comparator.comparingInt((BlockEntry b) -> b.relZ)
+                .thenComparingInt(b -> b.relY)
+                .thenComparingInt(b -> b.relX));
+
+        List<RleBlockEntry> rleBlocks = applyRLE(rawBlocks);
 
         File parent = file.getParentFile();
         if (parent != null && !parent.exists()) parent.mkdirs();
 
         try (DataOutputStream out = new DataOutputStream(
-                new BufferedOutputStream(new ZstdOutputStream(Files.newOutputStream(file.toPath()))))) {
+                new BufferedOutputStream(new ZstdOutputStream(Files.newOutputStream(file.toPath()), 6)))) {
             out.writeUTF(world.getName());
-            out.writeInt(minX);
-            out.writeInt(minY);
-            out.writeInt(minZ);
-            out.writeInt(anchorRelX);
-            out.writeInt(anchorRelY);
-            out.writeInt(anchorRelZ);
-            out.writeInt(paletteList.size());
+            writeVarInt(out, minX);
+            writeVarInt(out, minY);
+            writeVarInt(out, minZ);
+            writeVarInt(out, anchorRelX);
+            writeVarInt(out, anchorRelY);
+            writeVarInt(out, anchorRelZ);
+            writeVarInt(out, paletteList.size());
             for (String s : paletteList) out.writeUTF(s);
-            out.writeInt(blocks.size());
+            writeVarInt(out, rleBlocks.size());
             boolean useByte = paletteList.size() <= 256;
-            for (BlockEntry entry : blocks) {
-                out.writeShort(entry.relX);
-                out.writeShort(entry.relY);
-                out.writeShort(entry.relZ);
+            for (RleBlockEntry entry : rleBlocks) {
+                writeVarInt(out, entry.relX);
+                writeVarInt(out, entry.relY);
+                writeVarInt(out, entry.relZ);
                 if (useByte) {
                     out.writeByte(entry.paletteIdx);
                 } else {
-                    out.writeShort(entry.paletteIdx);
+                    writeVarInt(out, entry.paletteIdx);
                 }
+                writeVarInt(out, entry.count);
             }
         }
     }
@@ -102,48 +109,115 @@ public class AxisFormat {
             String worldName = in.readUTF();
             World world = Bukkit.getWorld(worldName);
             if (world == null) throw new IllegalStateException("World " + worldName + " not found!");
-            int minX = in.readInt();
-            int minY = in.readInt();
-            int minZ = in.readInt();
-            int anchorRelX = in.readInt();
-            int anchorRelY = in.readInt();
-            int anchorRelZ = in.readInt();
+            int minX = readVarInt(in);
+            int minY = readVarInt(in);
+            int minZ = readVarInt(in);
+            int anchorRelX = readVarInt(in);
+            int anchorRelY = readVarInt(in);
+            int anchorRelZ = readVarInt(in);
             int absOriginX = anchorLocation.getBlockX() - anchorRelX;
             int absOriginY = anchorLocation.getBlockY() - anchorRelY;
             int absOriginZ = anchorLocation.getBlockZ() - anchorRelZ;
-            int paletteSize = in.readInt();
+            int paletteSize = readVarInt(in);
             String[] palette = new String[paletteSize];
-            for (int i = 0; i < paletteSize; i++) palette[i] = in.readUTF();
+            for (int i = 0; i < paletteSize; i++) palette[i] = decompressBlockData(in.readUTF());
+            int blockCount = readVarInt(in);
             boolean useByte = paletteSize <= 256;
-            int blockCount = in.readInt();
-            Map<Location, BlockData> blocks = new HashMap<>(Math.max(4, blockCount));
+            Map<Location, BlockData> blocks = new HashMap<>();
             for (int i = 0; i < blockCount; i++) {
-                short relX = in.readShort();
-                short relY = in.readShort();
-                short relZ = in.readShort();
-                int paletteIdx = useByte ? in.readUnsignedByte() : in.readUnsignedShort();
+                int relX = readVarInt(in);
+                int relY = readVarInt(in);
+                int relZ = readVarInt(in);
+                int paletteIdx = useByte ? in.readUnsignedByte() : readVarInt(in);
+                int count = readVarInt(in);
                 String dataStr = palette[paletteIdx];
-                BlockData data;
-                try {
-                    data = Bukkit.createBlockData(dataStr);
-                } catch (IllegalArgumentException ex) {
-                    String fallback = dataStr.split("\\[", 2)[0];
-                    try {
-                        data = Bukkit.createBlockData(fallback);
-                    } catch (IllegalArgumentException ex2) {
-                        data = Bukkit.createBlockData("minecraft:air");
-                    }
+                BlockData data = createBlockDataSafe(dataStr);
+                for (int j = 0; j < count; j++) {
+                    Location loc = new Location(world, absOriginX + relX + j, absOriginY + relY, absOriginZ + relZ);
+                    blocks.put(loc, data);
                 }
-                Location loc = new Location(world, absOriginX + relX, absOriginY + relY, absOriginZ + relZ);
-                blocks.put(loc, data);
             }
-            if (blocks.isEmpty()) {
-                return;
-            }
+            if (blocks.isEmpty()) return;
             dev.lrxh.blockChanger.BlockChanger.setBlocks(blocks, true).thenRun(() -> {});
         }
     }
 
-    private record BlockEntry(short relX, short relY, short relZ, int paletteIdx) {
+    private List<RleBlockEntry> applyRLE(List<BlockEntry> blocks) {
+        List<RleBlockEntry> rleBlocks = new ArrayList<>();
+        if (blocks.isEmpty()) return rleBlocks;
+
+        BlockEntry prev = blocks.get(0);
+        int count = 1;
+
+        for (int i = 1; i < blocks.size(); i++) {
+            BlockEntry current = blocks.get(i);
+            if (prev.relX + count == current.relX &&
+                    prev.relY == current.relY &&
+                    prev.relZ == current.relZ &&
+                    prev.paletteIdx == current.paletteIdx) {
+                count++;
+            } else {
+                rleBlocks.add(new RleBlockEntry(prev.relX, prev.relY, prev.relZ, prev.paletteIdx, count));
+                prev = current;
+                count = 1;
+            }
+        }
+        rleBlocks.add(new RleBlockEntry(prev.relX, prev.relY, prev.relZ, prev.paletteIdx, count));
+        return rleBlocks;
     }
+
+    private void writeVarInt(DataOutputStream out, int value) throws IOException {
+        while ((value & ~0x7F) != 0) {
+            out.writeByte((value & 0x7F) | 0x80);
+            value >>>= 7;
+        }
+        out.writeByte(value);
+    }
+
+    private int readVarInt(DataInputStream in) throws IOException {
+        int value = 0;
+        int shift = 0;
+        byte b;
+        do {
+            b = in.readByte();
+            value |= (b & 0x7F) << shift;
+            shift += 7;
+        } while ((b & 0x80) != 0);
+        return value;
+    }
+
+    private String compressBlockData(String dataStr) {
+        if (dataStr.startsWith("minecraft:")) {
+            dataStr = dataStr.substring(10);
+        }
+        return dataStr.replace("[facing=north]", "")
+                .replace("[level=0]", "")
+                .replace("[waterlogged=false]", "")
+                .replace("[lit=false]", "")
+                .replace("[open=false]", "")
+                .replace("[powered=false]", "");
+    }
+
+    private String decompressBlockData(String compressed) {
+        if (!compressed.contains("[")) {
+            return "minecraft:" + compressed;
+        }
+        return "minecraft:" + compressed;
+    }
+
+    private BlockData createBlockDataSafe(String dataStr) {
+        try {
+            return Bukkit.createBlockData(dataStr);
+        } catch (IllegalArgumentException ex) {
+            String fallback = dataStr.split("\\[", 2)[0];
+            try {
+                return Bukkit.createBlockData(fallback);
+            } catch (IllegalArgumentException ex2) {
+                return Bukkit.createBlockData("minecraft:air");
+            }
+        }
+    }
+
+    private record BlockEntry(short relX, short relY, short relZ, int paletteIdx) {}
+    private record RleBlockEntry(short relX, short relY, short relZ, int paletteIdx, int count) {}
 }
