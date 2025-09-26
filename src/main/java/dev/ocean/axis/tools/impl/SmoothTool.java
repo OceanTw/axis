@@ -380,13 +380,13 @@ public class SmoothTool extends Tool {
     public ToolSettings createDefaultSettings() {
         ToolSettings settings = new ToolSettings();
         settings.set("radius", 5);
-        settings.set("smoothFactor", 1);
+        settings.set("smooth_factor", 1);
         return settings;
     }
 
     @Override
     public Set<String> getConfigurableSettings() {
-        return Set.of("radius", "smoothFactor");
+        return Set.of("radius", "smooth_factor");
     }
 
     @Override
