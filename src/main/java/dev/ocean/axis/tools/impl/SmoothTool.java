@@ -5,6 +5,7 @@ import dev.lrxh.blockChanger.snapshot.CuboidSnapshot;
 import dev.ocean.axis.history.HistoryService;
 import dev.ocean.axis.tools.Tool;
 import dev.ocean.axis.tools.ToolSettings;
+import dev.ocean.axis.utils.ComponentUtils;
 import dev.ocean.axis.utils.PlayerUtils;
 import dev.ocean.axis.utils.WorldUtils;
 import lombok.NonNull;
@@ -26,13 +27,13 @@ public class SmoothTool extends Tool {
     @Override
     public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
         if (HistoryService.get().getHistory(player).isEmpty()) {
-            PlayerUtils.sendActionBar(player, "No actions to undo!");
+            PlayerUtils.sendActionBar(player, "&cNo actions to undo!");
             PlayerUtils.playSoundError(player);
             return true;
         }
 
         HistoryService.get().undo(player).restore(true);
-        PlayerUtils.sendActionBar(player, "Undid 1 action");
+        PlayerUtils.sendActionBar(player, "&aUndid 1 action");
         PlayerUtils.playSoundInfo(player);
         return true;
     }
@@ -44,61 +45,56 @@ public class SmoothTool extends Tool {
 
         center = PlayerUtils.raycast(player, 0, true).getLocation();
 
-        Location min = center.clone().add(-radius, -radius, -radius);
-        Location max = center.clone().add(radius, radius, radius);
+        Location min = center.clone().add(-radius, -radius - 10, -radius);
+        Location max = center.clone().add(radius, radius + 10, radius);
 
         Location finalCenter = center;
         WorldUtils.getBlocksAsync(min, max).thenAccept(regionBlocks -> {
-            // Create a complete height map of the terrain (not just top layer)
-            Map<String, List<Integer>> columnHeights = new HashMap<>();
-            Map<String, List<Material>> columnMaterials = new HashMap<>();
+            Map<String, List<TerrainBlock>> columnData = new HashMap<>();
 
-            // Organize blocks by column (x,z) and store all solid blocks from bottom to top
             for (Location loc : regionBlocks.keySet()) {
                 BlockData data = regionBlocks.get(loc);
                 if (data != null && !data.getMaterial().isAir() && isSolidBlock(data.getMaterial())) {
                     String key = loc.getBlockX() + "," + loc.getBlockZ();
 
-                    if (!columnHeights.containsKey(key)) {
-                        columnHeights.put(key, new ArrayList<>());
-                        columnMaterials.put(key, new ArrayList<>());
+                    if (!columnData.containsKey(key)) {
+                        columnData.put(key, new ArrayList<>());
                     }
 
-                    // Insert in sorted order (lowest Y first)
-                    int y = loc.getBlockY();
-                    List<Integer> heights = columnHeights.get(key);
-                    List<Material> materials = columnMaterials.get(key);
-
-                    int insertIndex = 0;
-                    for (; insertIndex < heights.size(); insertIndex++) {
-                        if (y < heights.get(insertIndex)) {
-                            break;
-                        }
-                    }
-                    heights.add(insertIndex, y);
-                    materials.add(insertIndex, data.getMaterial());
+                    columnData.get(key).add(new TerrainBlock(loc.getBlockY(), data.getMaterial()));
                 }
             }
 
-            if (columnHeights.isEmpty()) {
+            if (columnData.isEmpty()) {
                 PlayerUtils.sendWarning(player, "No solid blocks found to smooth in the selected area!");
-                PlayerUtils.playSoundWarning(player);
                 return;
             }
 
-            // Get the top height map for smoothing calculations
+            for (List<TerrainBlock> blocks : columnData.values()) {
+                blocks.sort(Comparator.comparingInt(TerrainBlock::getY));
+            }
+
             Map<String, Integer> topHeights = new HashMap<>();
-            for (Map.Entry<String, List<Integer>> entry : columnHeights.entrySet()) {
-                List<Integer> heights = entry.getValue();
-                if (!heights.isEmpty()) {
-                    topHeights.put(entry.getKey(), heights.get(heights.size() - 1)); // Highest Y
+            for (Map.Entry<String, List<TerrainBlock>> entry : columnData.entrySet()) {
+                String[] coords = entry.getKey().split(",");
+                int x = Integer.parseInt(coords[0]);
+                int z = Integer.parseInt(coords[1]);
+
+                if (Math.abs(x - finalCenter.getBlockX()) <= radius && Math.abs(z - finalCenter.getBlockZ()) <= radius) {
+                    List<TerrainBlock> blocks = entry.getValue();
+                    if (!blocks.isEmpty()) {
+                        topHeights.put(entry.getKey(), blocks.get(blocks.size() - 1).getY());
+                    }
                 }
             }
 
-            // Apply smoothing to the top height map
+            if (topHeights.isEmpty()) {
+                PlayerUtils.sendWarning(player, "No blocks found within the smoothing radius!");
+                return;
+            }
+
             Map<String, Integer> smoothedTopHeights = smoothHeightMap(topHeights, smoothFactor);
 
-            // Calculate changes needed for the entire terrain volume
             Map<Location, BlockData> smoothedBlocks = new HashMap<>();
             int changesMade = 0;
 
@@ -112,116 +108,196 @@ public class SmoothTool extends Tool {
                     int x = Integer.parseInt(coords[0]);
                     int z = Integer.parseInt(coords[1]);
 
-                    List<Integer> originalHeights = columnHeights.get(key);
-                    List<Material> originalMaterials = columnMaterials.get(key);
+                    List<TerrainBlock> columnBlocks = columnData.get(key);
+                    if (columnBlocks == null || columnBlocks.isEmpty()) continue;
 
-                    // Case 1: Lowering terrain (smoothedTopY < originalTopY)
                     if (smoothedTopY < originalTopY) {
-                        // Remove blocks above the new top level
-                        for (int y = originalTopY; y > smoothedTopY; y--) {
-                            Location removeLoc = new Location(finalCenter.getWorld(), x, y, z);
-                            smoothedBlocks.put(removeLoc, Material.AIR.createBlockData());
-                            changesMade++;
-                        }
+                        changesMade += handleLoweringTerrain(finalCenter, x, z, originalTopY, smoothedTopY,
+                                columnBlocks, smoothedBlocks);
+                    } else {
+                        changesMade += handleRaisingTerrain(finalCenter, x, z, originalTopY, smoothedTopY,
+                                columnBlocks, smoothedBlocks);
                     }
-                    // Case 2: Raising terrain (smoothedTopY > originalTopY)
-                    else {
-                        // Find the most appropriate material to use for new blocks
-                        Material newMaterial = findBestMaterialForColumn(originalMaterials, originalHeights);
-
-                        // Add blocks up to the new top level
-                        for (int y = originalTopY + 1; y <= smoothedTopY; y++) {
-                            Location addLoc = new Location(finalCenter.getWorld(), x, y, z);
-                            smoothedBlocks.put(addLoc, newMaterial.createBlockData());
-                            changesMade++;
-                        }
-                    }
-
-                    // Ensure the terrain below maintains its integrity
-                    // If we removed blocks, make sure we're not leaving floating blocks
-                    ensureTerrainIntegrity(columnHeights, smoothedTopHeights, smoothedBlocks,
-                            finalCenter, changesMade);
                 }
             }
 
+            changesMade += ensureFullTerrainIntegrity(columnData, smoothedTopHeights, smoothedBlocks, finalCenter, radius);
+
             if (changesMade == 0) {
-                PlayerUtils.sendWarning(player, "No smoothing was needed - terrain is already smooth!");
-                PlayerUtils.playSoundWarning(player);
+                PlayerUtils.sendWarning(player, "No smoothing changes were made");
                 return;
             }
 
-            CuboidSnapshot.create(min, max).thenAccept(snapshot ->
+            Location originalMin = finalCenter.clone().add(-radius, -radius, -radius);
+            Location originalMax = finalCenter.clone().add(radius, radius, radius);
+
+            CuboidSnapshot.create(originalMin, originalMax).thenAccept(snapshot ->
                     HistoryService.get().add(player, snapshot));
 
             long startTime = System.currentTimeMillis();
-            PlayerUtils.sendInfo(player, "Smoothing " + changesMade + " blocks...");
 
             int finalChangesMade = changesMade;
             BlockChanger.setBlocks(smoothedBlocks, true).thenAccept(success -> {
                 long duration = System.currentTimeMillis() - startTime;
-                PlayerUtils.sendMessage(player,
-                        Component.text("§a§lSUCCESS! §rSmoothed §d" + finalChangesMade +
-                                "§r blocks in §e" + duration + "ms"));
-                PlayerUtils.playSoundSuccess(player);
+                PlayerUtils.sendActionBar(player, "Smoothed " + finalChangesMade + " blocks");
             });
         });
 
         return true;
     }
 
-    private void ensureTerrainIntegrity(Map<String, List<Integer>> columnHeights,
-                                        Map<String, Integer> smoothedTopHeights,
-                                        Map<Location, BlockData> smoothedBlocks,
-                                        Location center, int changesMade) {
-        // Check neighboring columns to ensure we're not creating overhangs or floating blocks
-        for (Map.Entry<String, List<Integer>> entry : columnHeights.entrySet()) {
+    private int handleLoweringTerrain(Location center, int x, int z, int originalTopY, int smoothedTopY,
+                                      List<TerrainBlock> columnBlocks, Map<Location, BlockData> smoothedBlocks) {
+        int changesMade = 0;
+
+        for (int y = originalTopY; y > smoothedTopY; y--) {
+            Location removeLoc = new Location(center.getWorld(), x, y, z);
+            smoothedBlocks.put(removeLoc, Material.AIR.createBlockData());
+            changesMade++;
+        }
+
+        boolean hasSupportBelow = false;
+        for (TerrainBlock block : columnBlocks) {
+            if (block.getY() == smoothedTopY - 1) {
+                hasSupportBelow = true;
+                break;
+            }
+        }
+
+        if (!hasSupportBelow && smoothedTopY > center.getWorld().getMinHeight() + 1) {
+            for (int y = smoothedTopY - 1; y >= Math.max(smoothedTopY - 3, center.getWorld().getMinHeight()); y--) {
+                Location supportLoc = new Location(center.getWorld(), x, y, z);
+                boolean isCurrentlyAir = true;
+                for (TerrainBlock block : columnBlocks) {
+                    if (block.getY() == y) {
+                        isCurrentlyAir = false;
+                        break;
+                    }
+                }
+                if (isCurrentlyAir) {
+                    Material supportMaterial = findSupportMaterial(columnBlocks);
+                    smoothedBlocks.put(supportLoc, supportMaterial.createBlockData());
+                    changesMade++;
+                }
+            }
+        }
+
+        return changesMade;
+    }
+
+    private int handleRaisingTerrain(Location center, int x, int z, int originalTopY, int smoothedTopY,
+                                     List<TerrainBlock> columnBlocks, Map<Location, BlockData> smoothedBlocks) {
+        int changesMade = 0;
+
+        int highestExistingY = originalTopY;
+        for (TerrainBlock block : columnBlocks) {
+            if (block.getY() > highestExistingY) {
+                highestExistingY = block.getY();
+            }
+        }
+
+        if (smoothedTopY > highestExistingY) {
+            Material newMaterial = findBestMaterialForColumn(columnBlocks);
+            for (int y = originalTopY + 1; y <= smoothedTopY; y++) {
+                Location addLoc = new Location(center.getWorld(), x, y, z);
+                smoothedBlocks.put(addLoc, newMaterial.createBlockData());
+                changesMade++;
+            }
+        } else {
+            Material newMaterial = findBestMaterialForColumn(columnBlocks);
+            for (int y = originalTopY + 1; y <= smoothedTopY; y++) {
+                Location replaceLoc = new Location(center.getWorld(), x, y, z);
+                smoothedBlocks.put(replaceLoc, newMaterial.createBlockData());
+                changesMade++;
+            }
+
+            for (int y = smoothedTopY + 1; y <= highestExistingY; y++) {
+                Location removeLoc = new Location(center.getWorld(), x, y, z);
+                smoothedBlocks.put(removeLoc, Material.AIR.createBlockData());
+                changesMade++;
+            }
+        }
+
+        return changesMade;
+    }
+
+    private int ensureFullTerrainIntegrity(Map<String, List<TerrainBlock>> columnData,
+                                           Map<String, Integer> smoothedTopHeights,
+                                           Map<Location, BlockData> smoothedBlocks,
+                                           Location center, int radius) {
+        int changesMade = 0;
+
+        for (Map.Entry<String, Integer> entry : smoothedTopHeights.entrySet()) {
             String key = entry.getKey();
             String[] coords = key.split(",");
             int x = Integer.parseInt(coords[0]);
             int z = Integer.parseInt(coords[1]);
+            int smoothedY = entry.getValue();
 
-            int currentTopY = smoothedTopHeights.get(key);
-
-            // Check if this column is significantly higher than its neighbors
-            // which would create floating blocks
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dz = -1; dz <= 1; dz++) {
                     if (dx == 0 && dz == 0) continue;
 
                     String neighborKey = (x + dx) + "," + (z + dz);
-                    Integer neighborTopY = smoothedTopHeights.get(neighborKey);
+                    Integer neighborY = smoothedTopHeights.get(neighborKey);
 
-                    if (neighborTopY != null && currentTopY > neighborTopY + 2) {
-                        // This column is too high compared to neighbor, lower it gradually
-                        int newTopY = Math.max(neighborTopY + 1, currentTopY - 1);
-                        if (newTopY != currentTopY) {
-                            smoothedTopHeights.put(key, newTopY);
+                    if (neighborY != null) {
+                        int heightDiff = smoothedY - neighborY;
 
-                            // Remove excess blocks
-                            for (int y = currentTopY; y > newTopY; y--) {
-                                Location removeLoc = new Location(center.getWorld(), x, y, z);
-                                smoothedBlocks.put(removeLoc, Material.AIR.createBlockData());
+                        if (heightDiff > 2) {
+                            int newY = Math.max(neighborY + 1, smoothedY - 1);
+                            if (newY != smoothedY) {
+                                smoothedTopHeights.put(key, newY);
+
+                                if (newY < smoothedY) {
+                                    for (int y = smoothedY; y > newY; y--) {
+                                        Location removeLoc = new Location(center.getWorld(), x, y, z);
+                                        smoothedBlocks.put(removeLoc, Material.AIR.createBlockData());
+                                        changesMade++;
+                                    }
+                                } else {
+                                    Material material = findBestMaterialForColumn(columnData.get(key));
+                                    for (int y = smoothedY + 1; y <= newY; y++) {
+                                        Location addLoc = new Location(center.getWorld(), x, y, z);
+                                        smoothedBlocks.put(addLoc, material.createBlockData());
+                                        changesMade++;
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         }
+
+        return changesMade;
     }
 
-    private Material findBestMaterialForColumn(List<Material> materials, List<Integer> heights) {
-        if (materials.isEmpty()) return Material.GRASS_BLOCK;
-
-        // Prefer the top material if it's suitable
-        Material topMaterial = materials.get(materials.size() - 1);
-        if (isGoodBuildingMaterial(topMaterial)) {
-            return topMaterial;
+    private Material findSupportMaterial(List<TerrainBlock> columnBlocks) {
+        for (TerrainBlock block : columnBlocks) {
+            Material material = block.getMaterial();
+            if (material == Material.STONE || material == Material.DEEPSLATE ||
+                    material == Material.ANDESITE || material == Material.DIORITE ||
+                    material == Material.GRANITE) {
+                return material;
+            }
         }
 
-        // Otherwise find the most common suitable material in the column
+        return Material.STONE;
+    }
+
+    private Material findBestMaterialForColumn(List<TerrainBlock> columnBlocks) {
+        if (columnBlocks.isEmpty()) return Material.GRASS_BLOCK;
+
+        TerrainBlock topBlock = columnBlocks.get(columnBlocks.size() - 1);
+        if (isGoodSurfaceMaterial(topBlock.getMaterial())) {
+            return topBlock.getMaterial();
+        }
+
         Map<Material, Integer> materialCount = new HashMap<>();
-        for (Material material : materials) {
-            if (isGoodBuildingMaterial(material)) {
+        for (TerrainBlock block : columnBlocks) {
+            Material material = block.getMaterial();
+            if (isGoodSurfaceMaterial(material)) {
                 materialCount.put(material, materialCount.getOrDefault(material, 0) + 1);
             }
         }
@@ -232,18 +308,14 @@ public class SmoothTool extends Tool {
                     .get().getKey();
         }
 
-        // Default to grass block if no suitable materials found
         return Material.GRASS_BLOCK;
     }
 
-    private boolean isGoodBuildingMaterial(Material material) {
-        return material.isSolid() &&
-                material != Material.WATER &&
-                material != Material.LAVA &&
-                material != Material.AIR &&
-                material != Material.SAND && // Avoid sandy materials for building up
-                material != Material.GRAVEL &&
-                material != Material.DIRT; // Prefer stone-like materials
+    private boolean isGoodSurfaceMaterial(Material material) {
+        return material == Material.GRASS_BLOCK || material == Material.DIRT ||
+                material == Material.STONE || material == Material.SAND ||
+                material == Material.GRAVEL || material == Material.COARSE_DIRT ||
+                material == Material.PODZOL || material == Material.MYCELIUM;
     }
 
     private Map<String, Integer> smoothHeightMap(Map<String, Integer> heightMap, int smoothFactor) {
@@ -256,18 +328,16 @@ public class SmoothTool extends Tool {
             int x = Integer.parseInt(coords[0]);
             int z = Integer.parseInt(coords[1]);
 
-            // Calculate weighted average height of neighboring blocks
             int sum = 0;
             int totalWeight = 0;
 
-            // Use a 3x3 area with distance-based weighting
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dz = -1; dz <= 1; dz++) {
                     String neighborKey = (x + dx) + "," + (z + dz);
                     Integer neighborHeight = heightMap.get(neighborKey);
 
                     if (neighborHeight != null) {
-                        int weight = (dx == 0 && dz == 0) ? 2 : 1; // Center has more weight
+                        int weight = (dx == 0 && dz == 0) ? 2 : 1;
                         sum += neighborHeight * weight;
                         totalWeight += weight;
                     }
@@ -276,7 +346,6 @@ public class SmoothTool extends Tool {
 
             if (totalWeight > 0) {
                 int averageHeight = Math.round(sum / (float) totalWeight);
-                // Apply smooth factor limitation
                 int difference = averageHeight - currentHeight;
                 int maxChange = Math.min(Math.abs(difference), smoothFactor);
 
@@ -328,5 +397,18 @@ public class SmoothTool extends Tool {
     @Override
     protected String getRightClickDescription() {
         return "Smooth terrain in selected area";
+    }
+
+    private static class TerrainBlock {
+        private final int y;
+        private final Material material;
+
+        public TerrainBlock(int y, Material material) {
+            this.y = y;
+            this.material = material;
+        }
+
+        public int getY() { return y; }
+        public Material getMaterial() { return material; }
     }
 }

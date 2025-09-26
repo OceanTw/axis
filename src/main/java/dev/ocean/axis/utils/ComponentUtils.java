@@ -39,10 +39,6 @@ public class ComponentUtils {
         return MINI.deserialize(mini).decoration(TextDecoration.ITALIC, false);
     }
 
-    public Component legacy(String legacy) {
-        return LEGACY.deserialize(legacy).decoration(TextDecoration.ITALIC, false);
-    }
-
     public static String toSmallText(String input) {
         StringBuilder sb = new StringBuilder();
         int i = 0;
