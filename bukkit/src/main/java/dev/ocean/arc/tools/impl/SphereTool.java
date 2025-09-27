@@ -1,6 +1,5 @@
 package dev.ocean.arc.tools.impl;
 
-import dev.ocean.arc.history.HistoryService;
 import dev.ocean.arc.tools.Tool;
 import dev.ocean.arc.tools.ToolSettings;
 import dev.ocean.arc.tools.patterns.SpherePattern;
@@ -25,14 +24,7 @@ public class SphereTool extends Tool {
 
     @Override
     public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
-        if (HistoryService.get().getHistory(player).isEmpty()) {
-            PlayerUtils.sendActionBar(player, "No actions to undo!");
-            PlayerUtils.playSoundError(player);
-            return true;
-        }
-
-        HistoryService.get().undo(player).restore(true);
-        PlayerUtils.sendActionBar(player, "Undid 1 action");
+        worldEditor.undo(player).thenRun(() -> PlayerUtils.sendActionBar(player, "Undo complete!"));
         PlayerUtils.playSoundInfo(player);
         return true;
     }
@@ -64,7 +56,7 @@ public class SphereTool extends Tool {
         long startTime = System.currentTimeMillis();
         PlayerUtils.sendInfo(player, "Generating sphere with material percentages...");
 
-        worldEditor.fill(pos1, pos2, pattern).thenAccept(blocksPlaced -> {
+        worldEditor.fill(pos1, pos2, pattern, player).thenAccept(blocksPlaced -> {
             long duration = System.currentTimeMillis() - startTime;
             PlayerUtils.sendMessage(player,
                     Component.text("§a§lSUCCESS! §rPlaced §d" + blocksPlaced + "§r blocks in §e" + duration + "ms"));
