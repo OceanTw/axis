@@ -1,11 +1,12 @@
 package dev.ocean.arc.utils.world;
 
-import dev.ocean.arc.utils.world.pattern.BlockPattern;
+import dev.ocean.api.world.pattern.BlockPattern;
 import dev.ocean.arc.utils.world.pattern.ReplacePattern;
 import dev.ocean.arc.utils.world.pattern.SinglePattern;
 import dev.ocean.arc.utils.world.region.ArcRegion;
 import dev.ocean.arc.utils.world.snapshot.ArcCuboidSnapshot;
 import dev.ocean.arc.utils.world.task.BatchProcessor;
+import lombok.experimental.UtilityClass;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Location;

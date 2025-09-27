@@ -16,8 +16,7 @@ import java.util.*;
 @UtilityClass
 // TODO: API
 public class ArcFormat {
-
-    public void save(Location pos1, Location pos2, File file, Location anchorLocation) throws IOException {
+    public void saveLocationToFile(Location pos1, Location pos2, File file, Location anchorLocation) throws IOException {
         Objects.requireNonNull(pos1, "Position 1 cannot be null");
         Objects.requireNonNull(pos2, "Position 2 cannot be null");
         Objects.requireNonNull(anchorLocation, "Anchor location cannot be null");

@@ -1,5 +1,6 @@
 package dev.ocean.arc.utils.world.pattern;
 
+import dev.ocean.api.world.pattern.BlockPattern;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 

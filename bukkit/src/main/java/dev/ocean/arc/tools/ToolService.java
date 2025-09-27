@@ -1,5 +1,6 @@
 package dev.ocean.arc.tools;
 
+import dev.ocean.api.tools.ArcTool;
 import dev.ocean.arc.ArcPlugin;
 import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
@@ -30,6 +31,10 @@ public class ToolService {
             instance = new ToolService();
         }
         return instance;
+    }
+
+    public void registerCustomTool(ArcTool tool) {
+        tools.put(tool.getName(), ((Tool) tool));
     }
 
     private void loadTools() {

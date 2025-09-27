@@ -1,5 +1,6 @@
 package dev.ocean.arc.tools.impl;
 
+import dev.ocean.api.tools.ArcToolSettings;
 import dev.ocean.arc.tools.Tool;
 import dev.ocean.arc.tools.ToolSettings;
 import dev.ocean.arc.utils.PlayerUtils;
@@ -21,14 +22,14 @@ public class SmoothTool extends Tool {
     private final ArcWorldEditor worldEditor = ArcWorldEditor.get();
 
     @Override
-    public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
+    public boolean onLeftClick(@NonNull Player player, Location location, ArcToolSettings settings) {
         worldEditor.undo(player).thenRun(() -> PlayerUtils.sendActionBar(player, "Undo complete!"));
         PlayerUtils.playSoundInfo(player);
         return true;
     }
 
     @Override
-    public boolean onRightClick(@NonNull Player player, Location center, ToolSettings settings) {
+    public boolean onRightClick(@NonNull Player player, Location center, ArcToolSettings settings) {
         int radius = settings.get("radius", 5);
         int smoothFactor = Math.max(1, settings.get("smoothFactor", 1));
 

@@ -1,4 +1,4 @@
-package dev.ocean.arc.utils.world.pattern;
+package dev.ocean.api.world.pattern;
 
 public interface BlockPattern {
     char getBlockId(int x, int y, int z);

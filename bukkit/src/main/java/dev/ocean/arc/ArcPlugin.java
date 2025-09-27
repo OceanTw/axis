@@ -1,6 +1,8 @@
 package dev.ocean.arc;
 
 import dev.lrxh.blockChanger.BlockChanger;
+import dev.ocean.api.Arc;
+import dev.ocean.arc.api.ArcApiImpl;
 import dev.ocean.arc.commands.ArcCommand;
 import dev.ocean.arc.commands.BenchmarkCommand;
 import dev.ocean.arc.commands.ToolCommand;
@@ -43,6 +45,8 @@ public class ArcPlugin extends JavaPlugin {
                         new BenchmarkCommand()
                 )
                 .build();
+
+        Arc._internalSetApi(new ArcApiImpl());
     }
 
     @Override

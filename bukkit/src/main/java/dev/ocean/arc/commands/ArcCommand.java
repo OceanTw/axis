@@ -37,7 +37,7 @@ public class ArcCommand {
 
         File outFile = new File(schematicsDir, name + ".arc");
         try {
-            ArcFormat.save(pos1, pos2, outFile, sender.getLocation());
+            ArcFormat.saveLocationToFile(pos1, pos2, outFile, sender.getLocation());
             PlayerUtils.sendInfo(sender, "Saved selection to " + name + ".arc");
         } catch (Exception e) {
             e.printStackTrace();

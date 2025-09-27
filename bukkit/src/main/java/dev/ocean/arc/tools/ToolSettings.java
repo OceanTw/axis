@@ -1,10 +1,11 @@
 package dev.ocean.arc.tools;
 
+import dev.ocean.api.tools.ArcToolSettings;
 import org.bukkit.Material;
 
 import java.util.*;
 
-public class ToolSettings {
+public class ToolSettings implements ArcToolSettings {
 
     private final Map<String, Object> settings = new HashMap<>();
 

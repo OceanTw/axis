@@ -1,5 +1,7 @@
 package dev.ocean.arc.tools;
 
+import dev.ocean.api.tools.ArcTool;
+import dev.ocean.api.tools.ArcToolSettings;
 import dev.ocean.arc.ArcPlugin;
 import dev.ocean.arc.utils.ComponentUtils;
 import lombok.Getter;
@@ -18,13 +20,13 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.*;
 
 @Getter
-public abstract class Tool {
+public abstract class Tool implements ArcTool {
 
     private final String name;
     private final String displayName;
     private final String description;
     private final Material icon;
-    private final ToolSettings defaultSettings;
+    private final ArcToolSettings defaultSettings;
 
     public Tool(@NonNull String name, @NonNull String displayName, @NonNull String description, @NonNull Material icon) {
         this.name = name;
@@ -34,10 +36,10 @@ public abstract class Tool {
         this.defaultSettings = createDefaultSettings();
     }
 
-    public abstract boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings);
-    public abstract boolean onRightClick(@NonNull Player player, Location location, ToolSettings settings);
+    public abstract boolean onLeftClick(@NonNull Player player, Location location, ArcToolSettings settings);
+    public abstract boolean onRightClick(@NonNull Player player, Location location, ArcToolSettings settings);
     public abstract boolean canUse(@NonNull Player player);
-    public abstract ToolSettings createDefaultSettings();
+    public abstract ArcToolSettings createDefaultSettings();
     public abstract Set<String> getConfigurableSettings();
 
     public ItemStack createItemStack() {
@@ -69,14 +71,14 @@ public abstract class Tool {
         return stored != null && stored.equals(name);
     }
 
-    public ToolSettings getItemSettings(ItemStack item) {
+    public ArcToolSettings getItemSettings(ItemStack item) {
         if (!matches(item)) return createDefaultSettings();
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return createDefaultSettings();
         return loadSettingsFromItem(meta);
     }
 
-    public void saveItemSettings(ItemStack item, ToolSettings settings) {
+    public void saveItemSettings(ItemStack item, ArcToolSettings settings) {
         if (!matches(item)) return;
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
@@ -84,7 +86,7 @@ public abstract class Tool {
         item.setItemMeta(meta);
     }
 
-    private void saveSettingsToItem(ItemMeta meta, ToolSettings settings) {
+    private void saveSettingsToItem(ItemMeta meta, ArcToolSettings settings) {
         PersistentDataContainer data = meta.getPersistentDataContainer();
 
         for (String key : getConfigurableSettings()) {
@@ -124,8 +126,8 @@ public abstract class Tool {
         }
     }
 
-    private ToolSettings loadSettingsFromItem(ItemMeta meta) {
-        ToolSettings settings = createDefaultSettings();
+    private ArcToolSettings loadSettingsFromItem(ItemMeta meta) {
+        ArcToolSettings settings = createDefaultSettings();
         PersistentDataContainer data = meta.getPersistentDataContainer();
 
         for (String key : getConfigurableSettings()) {
