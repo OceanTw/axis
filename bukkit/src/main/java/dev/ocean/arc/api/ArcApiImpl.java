@@ -51,4 +51,10 @@ public class ArcApiImpl implements ArcApi {
     public void saveLocationToFile(Location pos1, Location pos2, File file, Location anchorLocation) throws IOException {
         ArcFormat.saveLocationToFile(pos1, pos2, file, anchorLocation);
     }
+
+    @Override
+    public String testEcho(String message) {
+        return message;
+    }
+
 }

@@ -29,4 +29,6 @@ public interface ArcApi {
     CompletableFuture<Integer> replace(Location pos1, Location pos2, BlockData previousBlock, BlockData replacedBlock, Player executor);
 
     void saveLocationToFile(Location pos1, Location pos2, File file, Location anchorLocation) throws IOException;
+
+    String testEcho(String message);
 }
