@@ -1,6 +1,6 @@
 package dev.ocean.arc.tools.patterns;
 
-import dev.ocean.arc.utils.world.pattern.BlockPattern;
+import dev.ocean.api.world.pattern.BlockPattern;
 import net.minecraft.world.level.block.Block;
 import org.bukkit.Location;
 import org.bukkit.Material;

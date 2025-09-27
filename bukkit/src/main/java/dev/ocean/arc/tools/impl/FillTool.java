@@ -1,5 +1,6 @@
 package dev.ocean.arc.tools.impl;
 
+import dev.ocean.api.tools.ArcToolSettings;
 import dev.ocean.arc.region.SelectionService;
 import dev.ocean.arc.tools.Tool;
 import dev.ocean.arc.tools.ToolSettings;
@@ -25,14 +26,14 @@ public class FillTool extends Tool {
     private final ArcWorldEditor worldEditor = ArcWorldEditor.get();
 
     @Override
-    public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
+    public boolean onLeftClick(@NonNull Player player, Location location, ArcToolSettings settings) {
         worldEditor.undo(player).thenAccept(unused -> PlayerUtils.sendActionBar(player, "Undo complete!"));
         PlayerUtils.playSoundInfo(player);
         return true;
     }
 
     @Override
-    public boolean onRightClick(@NonNull Player player, Location location, ToolSettings settings) {
+    public boolean onRightClick(@NonNull Player player, Location location, ArcToolSettings settings) {
         var selectionOptional = selection.getSelection(player.getUniqueId());
         if (selectionOptional == null) {
             PlayerUtils.sendError(player, "No selection found! Make a selection first.");

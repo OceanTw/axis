@@ -1,5 +1,7 @@
 package dev.ocean.arc.tools;
 
+import dev.ocean.api.tools.ArcTool;
+import dev.ocean.api.tools.ArcToolSettings;
 import dev.ocean.arc.tools.menus.ToolSettingsMenu;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,7 +22,7 @@ public class ToolListener implements Listener {
         if (item == null || item.getType().isAir()) return;
 
         ToolService.get().getToolFromItem(item).ifPresent(tool -> {
-            ToolSettings settings = tool.getItemSettings(item);
+            ArcToolSettings settings = tool.getItemSettings(item);
             Action action = event.getAction();
 
             event.setCancelled(true);

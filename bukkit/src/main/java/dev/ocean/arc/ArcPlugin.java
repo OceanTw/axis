@@ -2,7 +2,7 @@ package dev.ocean.arc;
 
 import dev.lrxh.blockChanger.BlockChanger;
 import dev.ocean.api.ArcAPI;
-import dev.ocean.arc.api.Toolbelt;
+import dev.ocean.arc.api.ArcAPIImpl;
 import dev.ocean.arc.commands.ArcCommand;
 import dev.ocean.arc.commands.BenchmarkCommand;
 import dev.ocean.arc.commands.ToolCommand;
@@ -15,10 +15,10 @@ import lombok.Getter;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Main extends JavaPlugin {
+public class ArcPlugin extends JavaPlugin {
 
     @Getter
-    private static Main instance;
+    private static ArcPlugin instance;
     private LiteCommands<CommandSender> liteCommands;
 
     @Override
@@ -46,8 +46,7 @@ public class Main extends JavaPlugin {
                 )
                 .build();
 
-        ArcAPI._internalSetToolbelt(new Toolbelt() {
-        });
+        ArcAPI._internalSetApi(new ArcAPIImpl());
     }
 
     @Override

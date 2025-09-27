@@ -1,5 +1,6 @@
 package dev.ocean.arc.tools.menus;
 
+import dev.ocean.api.tools.ArcToolSettings;
 import dev.ocean.arc.tools.Tool;
 import dev.ocean.arc.tools.ToolSettings;
 import dev.ocean.arc.utils.menu.AbstractMenu;
@@ -21,7 +22,7 @@ import static dev.ocean.arc.utils.ComponentUtils.smallText;
 public class ToolSettingsMenu extends AbstractMenu {
 
     final Tool tool;
-    protected final ToolSettings settings;
+    protected final ArcToolSettings settings;
     private final Player player;
     final ItemStack toolItem;
 
@@ -258,7 +259,7 @@ public class ToolSettingsMenu extends AbstractMenu {
         return SimpleButton.builder()
                 .itemStack(new ItemStack(Material.BARRIER))
                 .leftClick(p -> {
-                    ToolSettings defaultSettings = tool.createDefaultSettings();
+                    ArcToolSettings defaultSettings = tool.createDefaultSettings();
                     for (String key : tool.getConfigurableSettings()) {
                         Object defaultValue = defaultSettings.get(key, null);
                         if (defaultValue != null) {

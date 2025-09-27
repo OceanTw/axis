@@ -1,6 +1,7 @@
 package dev.ocean.arc.tools;
 
-import dev.ocean.arc.Main;
+import dev.ocean.api.tools.ArcTool;
+import dev.ocean.arc.ArcPlugin;
 import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,7 +22,7 @@ public class ToolService {
     private final JavaPlugin plugin;
 
     private ToolService() {
-        this.plugin = Main.getInstance();
+        this.plugin = ArcPlugin.getInstance();
         loadTools();
     }
 
@@ -30,6 +31,10 @@ public class ToolService {
             instance = new ToolService();
         }
         return instance;
+    }
+
+    public void registerCustomTool(ArcTool tool) {
+        tools.put(tool.getName(), ((Tool) tool));
     }
 
     private void loadTools() {

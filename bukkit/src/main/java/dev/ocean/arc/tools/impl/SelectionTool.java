@@ -1,5 +1,6 @@
 package dev.ocean.arc.tools.impl;
 
+import dev.ocean.api.tools.ArcToolSettings;
 import dev.ocean.arc.region.SelectionService;
 import dev.ocean.arc.tools.Tool;
 import dev.ocean.arc.tools.ToolSettings;
@@ -19,7 +20,7 @@ public class SelectionTool extends Tool {
     SelectionService selection = SelectionService.get();
 
     @Override
-    public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
+    public boolean onLeftClick(@NonNull Player player, Location location, ArcToolSettings settings) {
         if (location == null) {
             selection.clear(player.getUniqueId());
             PlayerUtils.sendActionBar(player, "Selection cleared");
@@ -31,7 +32,7 @@ public class SelectionTool extends Tool {
     }
 
     @Override
-    public boolean onRightClick(@NonNull Player player, Location location, ToolSettings settings) {
+    public boolean onRightClick(@NonNull Player player, Location location, ArcToolSettings settings) {
         if (location == null) {
             return true;
         }
