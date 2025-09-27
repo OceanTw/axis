@@ -2,7 +2,7 @@ package dev.ocean.axis.format;
 
 import com.github.luben.zstd.ZstdInputStream;
 import com.github.luben.zstd.ZstdOutputStream;
-import dev.ocean.axis.utils.WorldUtils;
+import dev.ocean.axis.utils.world.AxisWorldEditor;
 import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -44,7 +44,7 @@ public class AxisFormat {
         Map<String, Integer> paletteMap = new LinkedHashMap<>();
         List<String> paletteList = new ArrayList<>();
 
-        Map<Location, BlockData> regionBlocks = WorldUtils.getBlocksAsync(
+        Map<Location, BlockData> regionBlocks = AxisWorldEditor.get().getBlocks(
                 new Location(world, minX, minY, minZ),
                 new Location(world, maxX, maxY, maxZ)
         ).join();
@@ -118,25 +118,45 @@ public class AxisFormat {
             int absOriginX = anchorLocation.getBlockX() - anchorRelX;
             int absOriginY = anchorLocation.getBlockY() - anchorRelY;
             int absOriginZ = anchorLocation.getBlockZ() - anchorRelZ;
+
             int paletteSize = readVarInt(in);
+            if (paletteSize <= 0 || paletteSize > 100000) {
+                throw new IOException("Invalid palette size: " + paletteSize);
+            }
+
             String[] palette = new String[paletteSize];
-            for (int i = 0; i < paletteSize; i++) palette[i] = decompressBlockData(in.readUTF());
+            for (int i = 0; i < paletteSize; i++) {
+                palette[i] = decompressBlockData(in.readUTF());
+            }
+
             int blockCount = readVarInt(in);
+            if (blockCount < 0) {
+                throw new IOException("Invalid block count: " + blockCount);
+            }
+
             boolean useByte = paletteSize <= 256;
             Map<Location, BlockData> blocks = new HashMap<>();
+
             for (int i = 0; i < blockCount; i++) {
                 int relX = readVarInt(in);
                 int relY = readVarInt(in);
                 int relZ = readVarInt(in);
                 int paletteIdx = useByte ? in.readUnsignedByte() : readVarInt(in);
                 int count = readVarInt(in);
+
+                if (paletteIdx < 0 || paletteIdx >= paletteSize) {
+                    throw new IOException("Palette index out of bounds: " + paletteIdx + " (palette size: " + paletteSize + ")");
+                }
+
                 String dataStr = palette[paletteIdx];
                 BlockData data = createBlockDataSafe(dataStr);
+
                 for (int j = 0; j < count; j++) {
                     Location loc = new Location(world, absOriginX + relX + j, absOriginY + relY, absOriginZ + relZ);
                     blocks.put(loc, data);
                 }
             }
+
             if (blocks.isEmpty()) return;
             dev.lrxh.blockChanger.BlockChanger.setBlocks(blocks, true).thenRun(() -> {});
         }

@@ -1,27 +1,27 @@
 package dev.ocean.axis.tools.impl;
 
-import dev.lrxh.blockChanger.BlockChanger;
-import dev.lrxh.blockChanger.snapshot.CuboidSnapshot;
 import dev.ocean.axis.history.HistoryService;
 import dev.ocean.axis.tools.Tool;
 import dev.ocean.axis.tools.ToolSettings;
+import dev.ocean.axis.tools.patterns.SpherePattern;
 import dev.ocean.axis.utils.PlayerUtils;
+import dev.ocean.axis.utils.world.AxisWorldEditor;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class SphereTool extends Tool {
     public SphereTool() {
         super("sphere", "Sphere Tool", "Creates a ball for you!", Material.HEART_OF_THE_SEA);
     }
+
+    private final AxisWorldEditor worldEditor = AxisWorldEditor.get();
 
     @Override
     public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
@@ -56,71 +56,26 @@ public class SphereTool extends Tool {
             center = PlayerUtils.raycast(player, settings.get("distance", 8), false).getLocation();
         }
 
-        Map<Location, BlockData> blocks = new HashMap<>();
-        int radiusSquared = radius * radius;
-        int innerRadiusSquared = (radius - 1) * (radius - 1);
+        SpherePattern pattern = new SpherePattern(blockSettings, replaceAirOnly, hollow, radius, center);
 
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = -radius; y <= radius; y++) {
-                for (int z = -radius; z <= radius; z++) {
-                    int distanceSquared = x * x + y * y + z * z;
-
-                    if (distanceSquared > radiusSquared) continue;
-                    if (hollow && distanceSquared < innerRadiusSquared) continue;
-
-                    Location loc = center.clone().add(x, y, z);
-
-                    if (replaceAirOnly && !loc.getBlock().getType().isAir()) {
-                        continue;
-                    }
-
-                    Material selected = selectMaterialByPercentage(blockSettings);
-                    if (selected != null) {
-                        blocks.put(loc, selected.createBlockData());
-                    }
-                }
-            }
-        }
-
-        if (blocks.isEmpty()) {
-            PlayerUtils.sendWarning(player, "No blocks were changed. Check your settings!");
-            PlayerUtils.playSoundWarning(player);
-            return false;
-        }
-
-        // save history for undo
-        CuboidSnapshot.create(center.clone().add(-radius, -radius, -radius),
-                        center.clone().add(radius, radius, radius))
-                .thenAccept(snapshot -> HistoryService.get().add(player, snapshot));
+        Location pos1 = center.clone().add(-radius, -radius, -radius);
+        Location pos2 = center.clone().add(radius, radius, radius);
 
         long startTime = System.currentTimeMillis();
-        PlayerUtils.sendInfo(player, "Generating sphere with " + blocks.size() + " blocks...");
+        PlayerUtils.sendInfo(player, "Generating sphere with material percentages...");
 
-        BlockChanger.setBlocks(blocks, true).thenAccept(success -> {
+        worldEditor.fill(pos1, pos2, pattern).thenAccept(blocksPlaced -> {
             long duration = System.currentTimeMillis() - startTime;
-            PlayerUtils.sendMessage(player, Component.text("§a§lSUCCESS! §rPlaced §d" + blocks.size() + "§r blocks in §e" + duration + "ms"));
+            PlayerUtils.sendMessage(player,
+                    Component.text("§a§lSUCCESS! §rPlaced §d" + blocksPlaced + "§r blocks in §e" + duration + "ms"));
             PlayerUtils.playSoundSuccess(player);
+
+            worldEditor.save(player.getWorld()).thenRun(() -> {
+                PlayerUtils.sendActionBar(player, "Sphere saved to world!");
+            });
         });
 
         return true;
-    }
-
-    private Material selectMaterialByPercentage(Map<Material, Double> materialPercentages) {
-        double total = materialPercentages.values().stream().mapToDouble(Double::doubleValue).sum();
-        if (total <= 0) return null;
-
-        double random = ThreadLocalRandom.current().nextDouble() * 100.0;
-        double cumulative = 0.0;
-
-        for (Map.Entry<Material, Double> entry : materialPercentages.entrySet()) {
-            cumulative += entry.getValue();
-            if (random <= cumulative) {
-                return entry.getKey();
-            }
-        }
-
-        // fallback
-        return materialPercentages.keySet().iterator().next();
     }
 
     @Override

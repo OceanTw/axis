@@ -4,7 +4,6 @@ import dev.ocean.axis.AxisPlugin;
 import dev.ocean.axis.format.AxisFormat;
 import dev.ocean.axis.region.SelectionService;
 import dev.ocean.axis.utils.PlayerUtils;
-import dev.ocean.axis.utils.WorldUtils;
 import dev.rollczi.litecommands.annotations.argument.Arg;
 import dev.rollczi.litecommands.annotations.command.Command;
 import dev.rollczi.litecommands.annotations.context.Context;
@@ -20,26 +19,6 @@ import java.io.File;
 public class AxisCommand {
 
     SelectionService selection = SelectionService.get();
-
-    @Execute(name = "getblock")
-    public void getBlock(@Context Player sender, @Arg int x, @Arg int y, @Arg int z) {
-        long start = System.currentTimeMillis();
-        WorldUtils.getBlockAsync(new Location(sender.getWorld(), x, y, z)).thenAccept(blockData -> {
-            PlayerUtils.sendInfo(sender, blockData.getMaterial().name());
-            long end = System.currentTimeMillis();
-            PlayerUtils.sendInfo(sender, "Took " + (end - start) + "ms");
-        });
-    }
-
-    @Execute(name = "getblock_bukkit")
-    public void getBlockBukkit(@Context Player sender, @Arg int x, @Arg int y, @Arg int z) {
-        long start = System.currentTimeMillis();
-        Location location = new Location(sender.getWorld(), x, y, z);
-        PlayerUtils.sendInfo(sender, location.getBlock().getType().name());
-        PlayerUtils.sendInfo(sender, sender.getWorld().getBlockAt(location).getType().name());
-        long end = System.currentTimeMillis();
-        PlayerUtils.sendInfo(sender, "Took " + (end - start) + "ms");
-    }
 
     @Execute(name = "save")
     public void save(@Context Player sender, @Arg String name) {

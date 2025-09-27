@@ -2,6 +2,7 @@ package dev.ocean.axis;
 
 import dev.lrxh.blockChanger.BlockChanger;
 import dev.ocean.axis.commands.AxisCommand;
+import dev.ocean.axis.commands.BenchmarkCommand;
 import dev.ocean.axis.commands.ToolCommand;
 import dev.ocean.axis.tools.ToolListener;
 import dev.ocean.axis.utils.menu.MenuListener;
@@ -37,7 +38,8 @@ public class AxisPlugin extends JavaPlugin {
         this.liteCommands = LiteBukkitFactory.builder("fallback-prefix", this)
                 .commands(
                         new ToolCommand(),
-                        new AxisCommand()
+                        new AxisCommand(),
+                        new BenchmarkCommand()
                 )
                 .build();
     }

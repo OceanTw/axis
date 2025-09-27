@@ -1,12 +1,10 @@
 package dev.ocean.axis.tools.impl;
 
-import dev.lrxh.blockChanger.BlockChanger;
-import dev.lrxh.blockChanger.snapshot.CuboidSnapshot;
 import dev.ocean.axis.history.HistoryService;
 import dev.ocean.axis.tools.Tool;
 import dev.ocean.axis.tools.ToolSettings;
 import dev.ocean.axis.utils.PlayerUtils;
-import dev.ocean.axis.utils.WorldUtils;
+import dev.ocean.axis.utils.world.AxisWorldEditor;
 import lombok.NonNull;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,6 +18,8 @@ public class SmoothTool extends Tool {
     public SmoothTool() {
         super("smooth", "Smooth Tool", "Smooth out terrain in a selected area!", Material.FEATHER);
     }
+
+    private final AxisWorldEditor worldEditor = AxisWorldEditor.get();
 
     @Override
     public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
@@ -41,12 +41,12 @@ public class SmoothTool extends Tool {
         int smoothFactor = Math.max(1, settings.get("smoothFactor", 1));
 
         center = PlayerUtils.raycast(player, 0, true).getLocation();
-
         Location min = center.clone().add(-radius, -radius - 10, -radius);
         Location max = center.clone().add(radius, radius + 10, radius);
 
         Location finalCenter = center;
-        WorldUtils.getBlocksAsync(min, max).thenAccept(regionBlocks -> {
+
+        worldEditor.getBlocks(min, max).thenAccept(regionBlocks -> {
             Map<String, List<TerrainBlock>> columnData = new HashMap<>();
 
             for (Location loc : regionBlocks.keySet()) {
@@ -125,17 +125,17 @@ public class SmoothTool extends Tool {
                 return;
             }
 
-            Location originalMin = finalCenter.clone().add(-radius, -radius, -radius);
-            Location originalMax = finalCenter.clone().add(radius, radius, radius);
-
-            CuboidSnapshot.create(originalMin, originalMax).thenAccept(snapshot ->
-                    HistoryService.get().add(player, snapshot));
-
             long startTime = System.currentTimeMillis();
 
             int finalChangesMade = changesMade;
-            BlockChanger.setBlocks(smoothedBlocks, true).thenAccept(success -> {
-                PlayerUtils.sendActionBar(player, "Smoothed " + finalChangesMade + " blocks");
+
+            worldEditor.setBlocks(smoothedBlocks).thenAccept(success -> {
+                long duration = System.currentTimeMillis() - startTime;
+                PlayerUtils.sendActionBar(player, "Smoothed " + finalChangesMade + " blocks in " + duration + "ms");
+
+                worldEditor.save(player.getWorld()).thenRun(() -> {
+                    PlayerUtils.sendActionBar(player, "Changes saved!");
+                });
             });
         });
 

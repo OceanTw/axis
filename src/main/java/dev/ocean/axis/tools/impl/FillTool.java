@@ -1,23 +1,21 @@
 package dev.ocean.axis.tools.impl;
 
-import dev.lrxh.blockChanger.BlockChanger;
-import dev.lrxh.blockChanger.snapshot.CuboidSnapshot;
 import dev.ocean.axis.history.HistoryService;
 import dev.ocean.axis.region.SelectionService;
 import dev.ocean.axis.tools.Tool;
 import dev.ocean.axis.tools.ToolSettings;
+import dev.ocean.axis.tools.patterns.MaterialPercentagePattern;
 import dev.ocean.axis.utils.PlayerUtils;
+import dev.ocean.axis.utils.world.AxisWorldEditor;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class FillTool extends Tool {
     public FillTool() {
@@ -25,6 +23,7 @@ public class FillTool extends Tool {
     }
 
     private final SelectionService selection = SelectionService.get();
+    private final AxisWorldEditor worldEditor = AxisWorldEditor.get();
 
     @Override
     public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
@@ -61,58 +60,23 @@ public class FillTool extends Tool {
         Location pos1 = selection.getPos1(player.getUniqueId());
         Location pos2 = selection.getPos2(player.getUniqueId());
 
-        // save snapshot for undo
-        CuboidSnapshot.create(pos1, pos2).thenAccept(snapshot -> HistoryService.get().add(player, snapshot));
+        MaterialPercentagePattern pattern = new MaterialPercentagePattern(blockSettings, replaceAirOnly, player.getWorld());
 
-        selectionOptional.getBlocksAsync().thenAccept(locations -> {
-            Map<Location, BlockData> blocksToSet = new HashMap<>();
+        long startTime = System.currentTimeMillis();
+        PlayerUtils.sendInfo(player, "Filling selection with material percentages...");
 
-            for (Location loc : locations) {
-                if (replaceAirOnly && !loc.getBlock().getType().isAir()) {
-                    continue;
-                }
+        worldEditor.fill(pos1, pos2, pattern).thenAccept(blocksChanged -> {
+            long duration = System.currentTimeMillis() - startTime;
+            PlayerUtils.sendMessage(player,
+                    Component.text("§a§lSUCCESS! §rFilled §d" + blocksChanged + "§r blocks in §e" + duration + "ms"));
+            PlayerUtils.playSoundSuccess(player);
 
-                Material selected = selectMaterialByPercentage(blockSettings);
-                if (selected != null) {
-                    blocksToSet.put(loc, selected.createBlockData());
-                }
-            }
-
-            if (blocksToSet.isEmpty()) {
-                PlayerUtils.sendWarning(player, "No blocks were changed. Check your settings.");
-                PlayerUtils.playSoundWarning(player);
-                return;
-            }
-
-            long startTime = System.currentTimeMillis();
-            PlayerUtils.sendInfo(player, "Filling " + blocksToSet.size() + " blocks...");
-
-            BlockChanger.setBlocks(blocksToSet, true).thenAccept(success -> {
-                long duration = System.currentTimeMillis() - startTime;
-                PlayerUtils.sendMessage(player,
-                        Component.text("§a§lSUCCESS! §rFilled §d" + blocksToSet.size() + "§r blocks in §e" + duration + "ms"));
-                PlayerUtils.playSoundSuccess(player);
+            worldEditor.save(player.getWorld()).thenRun(() -> {
+                PlayerUtils.sendActionBar(player, "Changes saved to world!");
             });
         });
 
         return true;
-    }
-
-    private Material selectMaterialByPercentage(Map<Material, Double> materialPercentages) {
-        double total = materialPercentages.values().stream().mapToDouble(Double::doubleValue).sum();
-        if (total <= 0) return null;
-
-        double random = ThreadLocalRandom.current().nextDouble() * 100.0;
-        double cumulative = 0.0;
-
-        for (Map.Entry<Material, Double> entry : materialPercentages.entrySet()) {
-            cumulative += entry.getValue();
-            if (random <= cumulative) {
-                return entry.getKey();
-            }
-        }
-
-        return materialPercentages.keySet().iterator().next();
     }
 
     @Override

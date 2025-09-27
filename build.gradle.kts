@@ -15,6 +15,8 @@ repositories {
     maven("https://oss.sonatype.org/content/groups/public/")
     maven("https://repo.panda-lang.org/releases")
     maven("https://jitpack.io")
+
+    maven("https://maven.enginehub.org/repo/")
 //    maven("https://repo.codemc.io/repository/maven-releases/")
 //    maven("https://repo.codemc.io/repository/maven-snapshots/")
 //    maven("https://maven.evokegames.gg/snapshots")
@@ -33,4 +35,8 @@ dependencies {
 
     implementation("org.projectlombok:lombok:1.18.42")
     annotationProcessor("org.projectlombok:lombok:1.18.42")
+
+    implementation(platform("com.intellectualsites.bom:bom-newest:1.55")) // Ref: https://github.com/IntellectualSites/bom
+    compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Core")
+    compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Bukkit") { isTransitive = false }
 }
