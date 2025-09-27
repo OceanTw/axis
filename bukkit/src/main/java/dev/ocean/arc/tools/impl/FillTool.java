@@ -70,10 +70,6 @@ public class FillTool extends Tool {
             PlayerUtils.sendMessage(player,
                     Component.text("§a§lSUCCESS! §rFilled §d" + blocksChanged + "§r blocks in §e" + duration + "ms"));
             PlayerUtils.playSoundSuccess(player);
-
-            worldEditor.save(player.getWorld()).thenRun(() -> {
-                PlayerUtils.sendActionBar(player, "Changes saved to world!");
-            });
         });
 
         return true;

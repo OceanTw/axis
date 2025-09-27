@@ -132,10 +132,6 @@ public class SmoothTool extends Tool {
             worldEditor.setBlocks(smoothedBlocks).thenAccept(success -> {
                 long duration = System.currentTimeMillis() - startTime;
                 PlayerUtils.sendActionBar(player, "Smoothed " + finalChangesMade + " blocks in " + duration + "ms");
-
-                worldEditor.save(player.getWorld()).thenRun(() -> {
-                    PlayerUtils.sendActionBar(player, "Changes saved!");
-                });
             });
         });
 

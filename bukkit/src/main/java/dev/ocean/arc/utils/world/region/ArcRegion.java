@@ -19,4 +19,11 @@ public class ArcRegion {
     public int chunkCount() {
         return (maxChunkX() - minChunkX() + 1) * (maxChunkZ() - minChunkZ() + 1);
     }
+
+    public int blockCount() {
+        int dx = this.maxX - this.minX + 1;
+        int dy = this.maxY - this.minY + 1;
+        int dz = this.maxZ - this.minZ + 1;
+        return dx * dy * dz;
+    }
 }

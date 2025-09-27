@@ -41,25 +41,25 @@ public class ArcWorldEditor {
     }
 
     // TODO: API
-    public CompletableFuture<Void> fill(Location pos1, Location pos2, BlockData blockData) {
+    public CompletableFuture<Integer> fill(Location pos1, Location pos2, BlockData blockData) {
         return fill(pos1, pos2, new SinglePattern(((CraftBlockData) blockData).getState()));
     }
 
     // TODO: API
-    public CompletableFuture<Void> fill(Location pos1, Location pos2, BlockPattern pattern) {
+    public CompletableFuture<Integer> fill(Location pos1, Location pos2, BlockPattern pattern) {
         World world = pos1.getWorld();
         World world2 = pos2.getWorld();
 
         if (world == null || world2 == null) {
             CompletableFuture<Void> failed = new CompletableFuture<>();
             failed.completeExceptionally(new IllegalArgumentException("Both locations must have a non-null world"));
-            return failed;
+            return CompletableFuture.completedFuture(0);
         }
 
         if (!world.equals(world2)) {
             CompletableFuture<Void> failed = new CompletableFuture<>();
             failed.completeExceptionally(new IllegalArgumentException("Both locations must be in the same world"));
-            return failed;
+            return CompletableFuture.completedFuture(0);
         }
 
         ArcRegion region = new ArcRegion(
@@ -67,11 +67,12 @@ public class ArcWorldEditor {
                 pos2.getBlockX(), pos2.getBlockY(), pos2.getBlockZ()
         );
 
-        return getProcessor(world).setBlocks(region, pattern);
+        getProcessor(world).setBlocks(region, pattern).thenAccept(unused -> save(world));
+        return CompletableFuture.completedFuture(region.blockCount());
     }
 
     // TODO: API
-    public CompletableFuture<Void> replace(Location pos1, Location pos2, BlockData from, BlockData to) {
+    public CompletableFuture<Integer> replace(Location pos1, Location pos2, BlockData from, BlockData to) {
         World world = pos1.getWorld();
         ArcRegion region = new ArcRegion(
                 pos1.getBlockX(), pos1.getBlockY(), pos1.getBlockZ(),
@@ -82,11 +83,11 @@ public class ArcWorldEditor {
         BlockState toState = ((CraftBlockData) to).getState();
 
         BlockPattern pattern = new ReplacePattern(fromState, toState);
-        return getProcessor(world).setBlocks(region, pattern);
+        getProcessor(world).setBlocks(region, pattern).thenAccept(unused -> save(world));
+        return CompletableFuture.completedFuture(region.blockCount());
     }
 
-    // TODO: API
-    public CompletableFuture<Void> save(World world) {
+    private CompletableFuture<Void> save(World world) {
         BatchProcessor processor = processors.get(world);
         if (processor != null) {
             return processor.saveAll();
@@ -95,7 +96,7 @@ public class ArcWorldEditor {
     }
 
     public void shutdown() {
-        processors.values().forEach(processor -> processor.saveAll());
+        processors.values().forEach(BatchProcessor::saveAll);
     }
 
     // TODO: API
@@ -181,7 +182,7 @@ public class ArcWorldEditor {
         for (Map.Entry<World, Map<Vec3i, Character>> entry : perWorld.entrySet()) {
             World world = entry.getKey();
             Map<Vec3i, Character> mapForWorld = entry.getValue();
-            futures.add(getProcessor(world).setBlocks(mapForWorld));
+            futures.add(getProcessor(world).setBlocks(mapForWorld).thenAccept(unused -> save(world)));
         }
 
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));

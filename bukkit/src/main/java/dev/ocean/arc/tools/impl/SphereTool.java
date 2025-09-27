@@ -69,10 +69,6 @@ public class SphereTool extends Tool {
             PlayerUtils.sendMessage(player,
                     Component.text("§a§lSUCCESS! §rPlaced §d" + blocksPlaced + "§r blocks in §e" + duration + "ms"));
             PlayerUtils.playSoundSuccess(player);
-
-            worldEditor.save(player.getWorld()).thenRun(() -> {
-                PlayerUtils.sendActionBar(player, "Sphere saved to world!");
-            });
         });
 
         return true;
