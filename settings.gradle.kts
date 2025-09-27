@@ -1,1 +1,4 @@
-rootProject.name = "axis"
+rootProject.name = "arc"
+
+include("api")
+include("bukkit")

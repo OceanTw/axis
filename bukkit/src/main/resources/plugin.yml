@@ -1,0 +1,3 @@
+name: Arc
+main: dev.ocean.arc.ArcPlugin
+version:
