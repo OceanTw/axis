@@ -1,6 +1,5 @@
 package dev.ocean.arc.tools.impl;
 
-import dev.ocean.arc.history.HistoryService;
 import dev.ocean.arc.region.SelectionService;
 import dev.ocean.arc.tools.Tool;
 import dev.ocean.arc.tools.ToolSettings;
@@ -27,14 +26,7 @@ public class FillTool extends Tool {
 
     @Override
     public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
-        if (HistoryService.get().getHistory(player).isEmpty()) {
-            PlayerUtils.sendActionBar(player, "No actions to undo!");
-            PlayerUtils.playSoundError(player);
-            return true;
-        }
-
-        HistoryService.get().undo(player).restore(true);
-        PlayerUtils.sendActionBar(player, "Undid 1 action");
+        worldEditor.undo(player).thenAccept(unused -> PlayerUtils.sendActionBar(player, "Undo complete!"));
         PlayerUtils.playSoundInfo(player);
         return true;
     }
@@ -65,15 +57,11 @@ public class FillTool extends Tool {
         long startTime = System.currentTimeMillis();
         PlayerUtils.sendInfo(player, "Filling selection with material percentages...");
 
-        worldEditor.fill(pos1, pos2, pattern).thenAccept(blocksChanged -> {
+        worldEditor.fill(pos1, pos2, pattern, player).thenAccept(blocksChanged -> {
             long duration = System.currentTimeMillis() - startTime;
             PlayerUtils.sendMessage(player,
                     Component.text("§a§lSUCCESS! §rFilled §d" + blocksChanged + "§r blocks in §e" + duration + "ms"));
             PlayerUtils.playSoundSuccess(player);
-
-            worldEditor.save(player.getWorld()).thenRun(() -> {
-                PlayerUtils.sendActionBar(player, "Changes saved to world!");
-            });
         });
 
         return true;

@@ -1,6 +1,5 @@
 package dev.ocean.arc.tools.impl;
 
-import dev.ocean.arc.history.HistoryService;
 import dev.ocean.arc.tools.Tool;
 import dev.ocean.arc.tools.ToolSettings;
 import dev.ocean.arc.utils.PlayerUtils;
@@ -23,14 +22,7 @@ public class SmoothTool extends Tool {
 
     @Override
     public boolean onLeftClick(@NonNull Player player, Location location, ToolSettings settings) {
-        if (HistoryService.get().getHistory(player).isEmpty()) {
-            PlayerUtils.sendActionBar(player, "&cNo actions to undo!");
-            PlayerUtils.playSoundError(player);
-            return true;
-        }
-
-        HistoryService.get().undo(player).restore(true);
-        PlayerUtils.sendActionBar(player, "&aUndid 1 action");
+        worldEditor.undo(player).thenRun(() -> PlayerUtils.sendActionBar(player, "Undo complete!"));
         PlayerUtils.playSoundInfo(player);
         return true;
     }
@@ -129,13 +121,9 @@ public class SmoothTool extends Tool {
 
             int finalChangesMade = changesMade;
 
-            worldEditor.setBlocks(smoothedBlocks).thenAccept(success -> {
+            worldEditor.setBlocks(smoothedBlocks, player).thenAccept(success -> {
                 long duration = System.currentTimeMillis() - startTime;
                 PlayerUtils.sendActionBar(player, "Smoothed " + finalChangesMade + " blocks in " + duration + "ms");
-
-                worldEditor.save(player.getWorld()).thenRun(() -> {
-                    PlayerUtils.sendActionBar(player, "Changes saved!");
-                });
             });
         });
 

@@ -22,6 +22,7 @@ import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Command(name = "benchmark")
 @Permission("arc.benchmark")
@@ -96,7 +97,7 @@ public class BenchmarkCommand {
                     long fillTime = System.nanoTime();
                     PlayerUtils.sendInfo(sender, "ArcWorldEditor Fill: " + size * size * size + " blocks in " + (fillTime - start) / 1_000_000 + "ms");
 
-                    return editor.save(bukkitWorld);
+                    return CompletableFuture.completedFuture(null);
                 })
                 .thenRun(() -> {
                     long saveTime = System.nanoTime();
