@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+// TODO: API
 public class SelectionService {
 
     private static SelectionService instance;

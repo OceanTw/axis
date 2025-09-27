@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 
+// TODO: API
 public class HistoryService {
     private static HistoryService instance;
 

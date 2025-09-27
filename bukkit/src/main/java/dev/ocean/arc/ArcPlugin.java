@@ -6,6 +6,7 @@ import dev.ocean.arc.commands.BenchmarkCommand;
 import dev.ocean.arc.commands.ToolCommand;
 import dev.ocean.arc.tools.ToolListener;
 import dev.ocean.arc.utils.menu.MenuListener;
+import dev.ocean.arc.utils.world.ArcWorldEditor;
 import dev.rollczi.litecommands.LiteCommands;
 import dev.rollczi.litecommands.bukkit.LiteBukkitFactory;
 import lombok.Getter;
@@ -47,5 +48,6 @@ public class ArcPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         this.liteCommands.unregister();
+        ArcWorldEditor.get().shutdown();
     }
 }
