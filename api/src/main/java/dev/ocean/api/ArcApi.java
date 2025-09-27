@@ -11,9 +11,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public interface IArcAPI {
-
-    IArcAPI getInstance();
+public interface ArcApi {
 
     void registerTool(ArcTool tool);
 

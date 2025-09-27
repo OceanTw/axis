@@ -1,6 +1,6 @@
 package dev.ocean.arc.api;
 
-import dev.ocean.api.IArcAPI;
+import dev.ocean.api.ArcApi;
 import dev.ocean.api.tools.ArcTool;
 import dev.ocean.api.world.pattern.BlockPattern;
 import dev.ocean.arc.format.ArcFormat;
@@ -15,15 +15,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class ArcAPIImpl implements IArcAPI {
-
-    ArcAPIImpl instance;
-
-    @Override
-    public ArcAPIImpl getInstance() {
-        if (instance == null) instance = new ArcAPIImpl();
-        return instance;
-    }
+public class ArcApiImpl implements ArcApi {
 
     @Override
     public void registerTool(ArcTool tool) {
