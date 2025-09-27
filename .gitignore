@@ -1,9 +1,8 @@
 /*
 
 !/api/
-!/*/src/
-!/*/build.gradle.kts
-!/*/settings.gradle.kts
+!/bukkit
+!/api
 !/dev/
 
 !/gradlew
