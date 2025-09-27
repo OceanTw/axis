@@ -27,6 +27,7 @@ dependencies {
     implementation("com.github.Devlrxxh:BlockChanger:23397d3")
     implementation("org.reflections:reflections:0.10.2")
     implementation("dev.rollczi:litecommands-bukkit:3.10.4")
+    implementation(project(":api"))
 //    compileOnly("com.github.retrooper:packetevents-spigot:2.9.5")
 //    implementation("me.tofaa.entitylib:spigot:+74871b3-SNAPSHOT")
     implementation("com.github.luben:zstd-jni:1.5.7-4")

@@ -1,6 +1,7 @@
 package dev.ocean.arc.utils.world;
 
-import dev.ocean.arc.utils.world.pattern.BlockPattern;
+import dev.ocean.api.ArcToolBelt;
+import dev.ocean.api.world.pattern.BlockPattern;
 import dev.ocean.arc.utils.world.pattern.ReplacePattern;
 import dev.ocean.arc.utils.world.pattern.SinglePattern;
 import dev.ocean.arc.utils.world.region.ArcRegion;
@@ -20,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ArcWorldEditor {
+public class ArcWorldEditor implements ArcToolBelt {
     private final Map<World, BatchProcessor> processors = new ConcurrentHashMap<>();
 
     private final Map<Character, BlockState> idToState = new ConcurrentHashMap<>();
@@ -40,12 +41,12 @@ public class ArcWorldEditor {
         return processors.computeIfAbsent(world, BatchProcessor::new);
     }
 
-    // TODO: API
+    @Override
     public CompletableFuture<Void> fill(Location pos1, Location pos2, BlockData blockData) {
         return fill(pos1, pos2, new SinglePattern(((CraftBlockData) blockData).getState()));
     }
 
-    // TODO: API
+    @Override
     public CompletableFuture<Void> fill(Location pos1, Location pos2, BlockPattern pattern) {
         World world = pos1.getWorld();
         World world2 = pos2.getWorld();
@@ -70,7 +71,7 @@ public class ArcWorldEditor {
         return getProcessor(world).setBlocks(region, pattern);
     }
 
-    // TODO: API
+    @Override
     public CompletableFuture<Void> replace(Location pos1, Location pos2, BlockData from, BlockData to) {
         World world = pos1.getWorld();
         ArcRegion region = new ArcRegion(
@@ -85,7 +86,6 @@ public class ArcWorldEditor {
         return getProcessor(world).setBlocks(region, pattern);
     }
 
-    // TODO: API
     public CompletableFuture<Void> save(World world) {
         BatchProcessor processor = processors.get(world);
         if (processor != null) {
@@ -98,7 +98,7 @@ public class ArcWorldEditor {
         processors.values().forEach(processor -> processor.saveAll());
     }
 
-    // TODO: API
+     @Override
     public CompletableFuture<Map<Location, BlockData>> getBlocks(Location min, Location max) {
         if (min == null || max == null) {
             CompletableFuture<Map<Location, BlockData>> failed = new CompletableFuture<>();
@@ -135,7 +135,6 @@ public class ArcWorldEditor {
         });
     }
 
-    // TODO: API
     public CompletableFuture<Void> setBlocks(Map<Location, BlockData> placements) {
         if (placements == null || placements.isEmpty()) {
             return CompletableFuture.completedFuture(null);

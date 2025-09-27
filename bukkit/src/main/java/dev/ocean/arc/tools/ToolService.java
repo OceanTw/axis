@@ -1,6 +1,6 @@
 package dev.ocean.arc.tools;
 
-import dev.ocean.arc.ArcPlugin;
+import dev.ocean.arc.Main;
 import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,7 +21,7 @@ public class ToolService {
     private final JavaPlugin plugin;
 
     private ToolService() {
-        this.plugin = ArcPlugin.getInstance();
+        this.plugin = Main.getInstance();
         loadTools();
     }
 

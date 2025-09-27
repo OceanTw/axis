@@ -1,6 +1,6 @@
 package dev.ocean.arc.commands;
 
-import dev.ocean.arc.ArcPlugin;
+import dev.ocean.arc.Main;
 import dev.ocean.arc.format.ArcFormat;
 import dev.ocean.arc.region.SelectionService;
 import dev.ocean.arc.utils.PlayerUtils;
@@ -29,7 +29,7 @@ public class ArcCommand {
         Location pos1 = selection.getPos1(sender.getUniqueId());
         Location pos2 = selection.getPos2(sender.getUniqueId());
 
-        File schematicsDir = new File(ArcPlugin.getInstance().getDataFolder(), "schematics");
+        File schematicsDir = new File(Main.getInstance().getDataFolder(), "schematics");
         if (!schematicsDir.exists() && !schematicsDir.mkdirs()) {
             PlayerUtils.sendError(sender, "Failed to create schematics folder");
             return;
@@ -47,7 +47,7 @@ public class ArcCommand {
 
     @Execute(name = "load")
     public void load(@Context Player sender, @Arg String name) {
-        File schematicsDir = new File(ArcPlugin.getInstance().getDataFolder(), "schematics");
+        File schematicsDir = new File(Main.getInstance().getDataFolder(), "schematics");
         File file = new File(schematicsDir, name + ".arc");
         if (!file.exists()) {
             PlayerUtils.sendError(sender, "File not found!");

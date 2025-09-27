@@ -1,6 +1,6 @@
 package dev.ocean.arc.tools;
 
-import dev.ocean.arc.ArcPlugin;
+import dev.ocean.arc.Main;
 import dev.ocean.arc.utils.ComponentUtils;
 import lombok.Getter;
 import lombok.NonNull;
@@ -91,7 +91,7 @@ public abstract class Tool {
             Object value = settings.get(key, null);
             if (value == null) continue;
 
-            NamespacedKey settingKey = new NamespacedKey(ArcPlugin.getInstance(), "setting_" + key);
+            NamespacedKey settingKey = new NamespacedKey(Main.getInstance(), "setting_" + key);
 
             if (value instanceof Boolean) {
                 data.set(settingKey, PersistentDataType.BYTE, (byte) (((Boolean) value) ? 1 : 0));
@@ -129,7 +129,7 @@ public abstract class Tool {
         PersistentDataContainer data = meta.getPersistentDataContainer();
 
         for (String key : getConfigurableSettings()) {
-            NamespacedKey settingKey = new NamespacedKey(ArcPlugin.getInstance(), "setting_" + key);
+            NamespacedKey settingKey = new NamespacedKey(Main.getInstance(), "setting_" + key);
             Object defaultValue = settings.get(key, null);
 
             if (defaultValue instanceof Boolean) {
@@ -177,7 +177,7 @@ public abstract class Tool {
     }
 
     private NamespacedKey getToolIdKey() {
-        return new NamespacedKey(ArcPlugin.getInstance(), "tool-id");
+        return new NamespacedKey(Main.getInstance(), "tool-id");
     }
 
     protected List<Component> createItemLore() {

@@ -1,9 +1,9 @@
 package dev.ocean.arc.utils.world.task;
 
+import dev.ocean.api.world.pattern.BlockPattern;
 import dev.ocean.arc.utils.world.chunk.ChunkCoord;
 import dev.ocean.arc.utils.world.chunk.ConcurrentChunk;
 import dev.ocean.arc.utils.world.chunk.SectionEditor;
-import dev.ocean.arc.utils.world.pattern.BlockPattern;
 import dev.ocean.arc.utils.world.region.ArcRegion;
 import net.minecraft.core.Vec3i;
 import org.bukkit.World;
